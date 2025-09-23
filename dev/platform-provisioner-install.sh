@@ -43,13 +43,13 @@
 #   ./platform-provisioner-install.sh
 #######################################
 
-[[ -z "${PIPELINE_DOCKER_IMAGE}" ]] && export PIPELINE_DOCKER_IMAGE=${PIPELINE_DOCKER_IMAGE:-"ghcr.io/tibcosoftware/platform-provisioner/platform-provisioner:latest"}
-[[ -z "${PIPELINE_DOCKER_IMAGE_TESTER}" ]] && export PIPELINE_DOCKER_IMAGE_TESTER=${PIPELINE_DOCKER_IMAGE_TESTER:-"ghcr.io/tibcosoftware/platform-provisioner/platform-provisioner:v1.0.0-tester"}
+[[ -z "${PIPELINE_DOCKER_IMAGE}" ]] && export PIPELINE_DOCKER_IMAGE=${PIPELINE_DOCKER_IMAGE:-"ghcr.io/tibcosoftware/platform-provisioner/platform-provisioner:1.6.0-on-prem"}
+[[ -z "${PIPELINE_DOCKER_IMAGE_TESTER}" ]] && export PIPELINE_DOCKER_IMAGE_TESTER=${PIPELINE_DOCKER_IMAGE_TESTER:-"ghcr.io/tibcosoftware/platform-provisioner/platform-provisioner:1.6.1-tester-on-prem-jammy"}
 [[ -z "${PIPELINE_SKIP_PROVISIONER_UI}" ]] && export PIPELINE_SKIP_PROVISIONER_UI=${PIPELINE_SKIP_PROVISIONER_UI:-false}
 [[ -z "${PIPELINE_SKIP_TEKTON_PIPELINE}" ]] && export PIPELINE_SKIP_TEKTON_PIPELINE=${PIPELINE_SKIP_TEKTON_PIPELINE:-false}
 [[ -z "${PIPELINE_SKIP_TEKTON_DASHBOARD}" ]] && export PIPELINE_SKIP_TEKTON_DASHBOARD=${PIPELINE_SKIP_TEKTON_DASHBOARD:-true}
-[[ -z "${TEKTON_PIPELINE_RELEASE}" ]] && export TEKTON_PIPELINE_RELEASE=${TEKTON_PIPELINE_RELEASE:-"v0.65.0"}
-[[ -z "${TEKTON_DASHBOARD_RELEASE}" ]] && export TEKTON_DASHBOARD_RELEASE=${TEKTON_DASHBOARD_RELEASE:-"v0.52.0"}
+[[ -z "${TEKTON_PIPELINE_RELEASE}" ]] && export TEKTON_PIPELINE_RELEASE=${TEKTON_PIPELINE_RELEASE:-"v1.0.0"}
+[[ -z "${TEKTON_DASHBOARD_RELEASE}" ]] && export TEKTON_DASHBOARD_RELEASE=${TEKTON_DASHBOARD_RELEASE:-"v0.57.0"}
 [[ -z "${PIPELINE_CHART_VERSION_COMMON}" ]] && export PIPELINE_CHART_VERSION_COMMON=${PIPELINE_CHART_VERSION_COMMON:-"^1.0.0"}
 [[ -z "${PIPELINE_CHART_VERSION_GENERIC_RUNNER}" ]] && export PIPELINE_CHART_VERSION_GENERIC_RUNNER=${PIPELINE_CHART_VERSION_GENERIC_RUNNER:-"^1.0.0"}
 [[ -z "${PIPELINE_CHART_VERSION_HELM_INSTALL}" ]] && export PIPELINE_CHART_VERSION_HELM_INSTALL=${PIPELINE_CHART_VERSION_HELM_INSTALL:-"^1.0.0"}
@@ -105,6 +105,8 @@ function k8s-waitfor-deployment() {
 if [[ ${PIPELINE_SKIP_TEKTON_PIPELINE} != "true" ]]; then
   k8s-waitfor-deployment "tekton-pipelines" "tekton-pipelines-controller" "120s"
   k8s-waitfor-deployment "tekton-pipelines" "tekton-pipelines-webhook" "120s"
+  # need to set to true to enable security context for the pipeline
+  # kubectl patch configmap -n tekton-pipelines feature-flags --type merge -p '{"data":{"set-security-context":"true"}}'
 fi
 
 # create service account for this pipeline
@@ -114,25 +116,28 @@ kubectl create clusterrolebinding "${_service_account_admin_name}" --clusterrole
 
 # install a sample pipeline with docker image that can run locally
 helm upgrade --install -n "${PIPELINE_NAMESPACE}" common-dependency common-dependency \
-  --version "${PIPELINE_CHART_VERSION_COMMON}" --repo "${PLATFORM_PROVISIONER_PIPELINE_REPO}" \
-  --set githubToken="${GITHUB_TOKEN}"
+  --version "${PIPELINE_CHART_VERSION_COMMON}" --repo "${PLATFORM_PROVISIONER_PIPELINE_REPO}" -f - <<EOF
+githubToken: "${GITHUB_TOKEN}"
+EOF
 if [[ $? -ne 0 ]]; then
   echo "failed to install common-dependency"
   exit 1
 fi
 
 helm upgrade --install -n "${PIPELINE_NAMESPACE}" generic-runner generic-runner \
-  --version "${PIPELINE_CHART_VERSION_GENERIC_RUNNER}" --repo "${PLATFORM_PROVISIONER_PIPELINE_REPO}" \
-  --set serviceAccount=pipeline-cluster-admin \
-  --set pipelineImage="${PIPELINE_DOCKER_IMAGE}"
+  --version "${PIPELINE_CHART_VERSION_GENERIC_RUNNER}" --repo "${PLATFORM_PROVISIONER_PIPELINE_REPO}" -f - <<EOF
+serviceAccount: pipeline-cluster-admin
+pipelineImage: "${PIPELINE_DOCKER_IMAGE}"
+EOF
 if [[ $? -ne 0 ]]; then
   echo "failed to install generic-runner pipeline"
   exit 1
 fi
 
-helm upgrade --install -n "${PIPELINE_NAMESPACE}" generic-runner-tester generic-runner \
+export PIPELINE_CHART_RELEASE_NAME_GENERIC_RUNNER_TESTER="generic-runner-tester"
+helm upgrade --install -n "${PIPELINE_NAMESPACE}" "${PIPELINE_CHART_RELEASE_NAME_GENERIC_RUNNER_TESTER}" generic-runner \
   --version "${PIPELINE_CHART_VERSION_GENERIC_RUNNER}" --repo "${PLATFORM_PROVISIONER_PIPELINE_REPO}" -f - <<EOF
-name: generic-runner-tester
+name: ${PIPELINE_CHART_RELEASE_NAME_GENERIC_RUNNER_TESTER}
 serviceAccount: pipeline-cluster-admin
 pipelineImage: ${PIPELINE_DOCKER_IMAGE_TESTER}
 EOF
@@ -142,9 +147,10 @@ if [[ $? -ne 0 ]]; then
 fi
 
 helm upgrade --install -n "${PIPELINE_NAMESPACE}" helm-install helm-install \
-  --version "${PIPELINE_CHART_VERSION_HELM_INSTALL}" --repo "${PLATFORM_PROVISIONER_PIPELINE_REPO}" \
-  --set serviceAccount=pipeline-cluster-admin \
-  --set pipelineImage="${PIPELINE_DOCKER_IMAGE}"
+  --version "${PIPELINE_CHART_VERSION_HELM_INSTALL}" --repo "${PLATFORM_PROVISIONER_PIPELINE_REPO}" -f - <<EOF
+serviceAccount: pipeline-cluster-admin
+pipelineImage: "${PIPELINE_DOCKER_IMAGE}"
+EOF
 if [[ $? -ne 0 ]]; then
   echo "failed to install helm-install pipeline"
   exit 1

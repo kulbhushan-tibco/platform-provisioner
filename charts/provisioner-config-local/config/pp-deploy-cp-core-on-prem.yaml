@@ -28,8 +28,8 @@ groups:
   index: 5
   description: |
     ## TIBCO Platform Control Plane specific configurations.
-    * The CP chart version matrix: [link](https://docs.tibco.com/pub/platform-cp/1.3.0/doc/html/Default.htm#Installation/helm-chart-version-matrix.htm)
-    * The CP chart config doc: [link](https://docs.tibco.com/pub/platform-cp/1.3.0/doc/html/Default.htm#Installation/configuration-reference.htm)
+    * The CP chart version matrix: [link](https://docs.tibco.com/pub/platform-cp/1.5.1/doc/html/Default.htm#Installation/helm-chart-version-matrix.htm)
+    * The CP chart config doc: [link](https://docs.tibco.com/pub/platform-cp/1.5.1/doc/html/Default.htm#Installation/configuration-reference.htm)
     ---
 - title: "CP ingress"
   index: 6
@@ -41,7 +41,7 @@ groups:
   index: 7
   description: |
     ## Cluster storage specific configurations.
-    * For the on-perm setup we have
+    * For the on-prem setup we have
       * Docker Desktop: `hostpath` (support ReadWriteMany)
       * minikube: `standard` (support ReadWriteMany)
       * kind: `standard` (Don't support ReadWriteMany)
@@ -92,13 +92,20 @@ options:
   guiType: input
   reference: "meta.guiEnv.GUI_CP_CHART_REPO_TOKEN"
   description: ""
-- name: "DP Chart repo"
+- name: "DP Chart repo host"
   groupIndex: 1
   type: string
   guiType: input
-  reference: "meta.guiEnv.GUI_DP_CHART_REPO"
+  reference: "meta.guiEnv.GUI_DP_CHART_REPO_HOST"
   description: |
-    The helm chart repository to deploy DP. The default value is public repo. To use private repo set: https://raw.githubusercontent.com/tibco/tp-helm-charts/gh-pages and set `GUI_DP_CHART_REPO_TOKEN`
+    The host name of the DP chart repository. like: https://tibcosoftware.github.io
+- name: "DP Chart repo path"
+  groupIndex: 1
+  type: string
+  guiType: input
+  reference: "meta.guiEnv.GUI_DP_CHART_REPO_PATH"
+  description: |
+    The path of the DP chart repository. like: tp-helm-charts
 - name: "DP Chart repo user name"
   groupIndex: 1
   type: string
@@ -131,6 +138,7 @@ options:
 - name: "Container Registry Username"
   groupIndex: 2
   type: string
+  required: true
   guiType: input
   reference: "meta.guiEnv.GUI_CP_CONTAINER_REGISTRY_USERNAME"
   description: |
@@ -138,6 +146,7 @@ options:
 - name: "Container Registry Password"
   groupIndex: 2
   type: password
+  required: true
   guiType: input
   reference: "meta.guiEnv.GUI_CP_CONTAINER_REGISTRY_PASSWORD"
   description: |
@@ -186,6 +195,12 @@ options:
   guiType: checkbox
   reference: "meta.guiEnv.GUI_CP_LOG_ENABLE"
   description: "Enable CP log"
+- name: "Enable CP network policies"
+  groupIndex: 5
+  type: boolean
+  guiType: checkbox
+  reference: "meta.guiEnv.GUI_TP_CREATE_NETWORK_POLICIES"
+  description: "Enable CP network policies. Default is false."
 - name: "CP external env"
   groupIndex: 5
   type: string
@@ -210,6 +225,34 @@ options:
   guiType: input
   reference: "meta.guiEnv.GUI_CP_EXT_NAMESPACE"
   description: "The CP third party tools namespace."
+- name: "Enable CP resource constraints"
+  groupIndex: 5
+  type: boolean
+  guiType: checkbox
+  reference: "meta.guiEnv.GUI_CP_GLOBAL_ENABLE_RESOURCE_CONSTRAINTS"
+  description: |
+    Set to true to enable resource constraints for CP. Default is true.
+- name: "CP proxy http proxy"
+  groupIndex: 5
+  type: string
+  guiType: input
+  reference: "meta.guiEnv.GUI_CP_PROXY_HTTP_PROXY"
+  description: |
+    The CP proxy http proxy. Example: http://proxy.example.com:8080
+- name: "CP proxy https proxy"
+  groupIndex: 5
+  type: string
+  guiType: input
+  reference: "meta.guiEnv.GUI_CP_PROXY_HTTPS_PROXY"
+  description: |
+    The CP proxy https proxy. Example: https://proxy.example.com:8080
+- name: "CP proxy no proxy"
+  groupIndex: 5
+  type: string
+  guiType: input
+  reference: "meta.guiEnv.GUI_CP_PROXY_NO_PROXY"
+  description: |
+    The CP proxy no proxy. Example: .example1.com,.example2.com
 
 # groupIndex: 6 CP ingress
 - name: "CP DNS domain"
@@ -219,7 +262,7 @@ options:
   reference: "meta.guiEnv.GUI_CP_DNS_DOMAIN"
   required: true
   description: |
-    The CP DNS domain for on-perm setup.
+    The CP DNS domain for on-prem setup.
 - name: "TP tls cert"
   groupIndex: 6
   type: string
@@ -295,6 +338,13 @@ options:
   required: true
   description: |
     The size of the PV. Example: 10Gi.
+- name: "CP storage PVC name"
+  groupIndex: 7
+  type: string
+  guiType: input
+  reference: "meta.guiEnv.GUI_CP_STORAGE_PVC_NAME"
+  description: |
+    Pre-create PVC name
 
 # groupIndex: 8 CP DB
 - name: "CP DB host"
@@ -375,13 +425,20 @@ options:
   description: "Delete the DB on uninstall"
 
 # groupIndex: 9 CP email
+- name: "CP mail from and replyTo email"
+  groupIndex: 9
+  type: string
+  guiType: input
+  reference: "meta.guiEnv.GUI_CP_FROM_REPLY_TO_EMAIL"
+  description: |
+    CP from and replyTo email.
 - name: "CP mail server type"
   groupIndex: 9
   type: string
   guiType: input
   reference: "meta.guiEnv.GUI_CP_MAIL_SERVER_TYPE"
   description: |
-    The mail server protocol type. The default value is smtp. Choice: smtp, ses, sendgrid
+    The mail server protocol type. The default value is smtp. Choice: smtp, ses, sendgrid, graph
 - name: "CP mail server SES ARN"
   groupIndex: 9
   type: string
@@ -421,6 +478,20 @@ options:
   guiType: input
   reference: "meta.guiEnv.GUI_CP_MAIL_SERVER_PASSWORD"
   description: ""
+- name: "CP mail server graph client secret name"
+  groupIndex: 9
+  type: string
+  guiType: input
+  reference: "meta.guiEnv.GUI_CP_MAIL_SERVER_GRAPH_CLIENT_DETAILS_SECRET_NAME"
+  description: |
+    The secret name for the Graph client details. The default value is graph-client-details
+- name: "CP mail server graph skip sent folder"
+  groupIndex: 9
+  type: string
+  guiType: input
+  reference: "meta.guiEnv.GUI_CP_MAIL_SERVER_GRAPH_SKIP_SENT_FOLDER"
+  description: |
+    The Graph skip sent folder. The default value is false.
 
 # groupIndex: 10 Flow control
 - name: "Validate Cluster Resource"
@@ -473,24 +544,22 @@ options:
   guiType: checkbox
   reference: "meta.guiEnv.GUI_CP_INSTALL_INTEGRATION"
   description: ""
-- name: "Install integration BWCE"
+- name: "Install integration BW"
   groupIndex: 10
   type: boolean
   guiType: checkbox
-  reference: "meta.guiEnv.GUI_CP_INSTALL_INTEGRATION_BWCE"
-  description: ""
+  reference: "meta.guiEnv.GUI_CP_INSTALL_INTEGRATION_BW"
+  description: "New values for 1.8.0 and later"
 - name: "Install integration BWCE utilities"
   groupIndex: 10
   type: boolean
   guiType: checkbox
   reference: "meta.guiEnv.GUI_CP_INSTALL_INTEGRATION_BWCE_UTILITIES"
-  description: "This will create 3 jobs to install BWCE utilities. Each will download 1.5GB of data"
-- name: "Install integration BW5"
+- name: "Install integration BW5CE utilities"
   groupIndex: 10
   type: boolean
   guiType: checkbox
-  reference: "meta.guiEnv.GUI_CP_INSTALL_INTEGRATION_BW5"
-  description: ""
+  reference: "meta.guiEnv.GUI_CP_INSTALL_INTEGRATION_BW5CE_UTILITIES"
 - name: "Install integration Flogo"
   groupIndex: 10
   type: boolean

@@ -1,0 +1,39 @@
+[project]
+name = "tp-automation"
+version = "1.10.0"
+description = "This project use playwright to automate TIBCO Platform setup and configuration."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    # CLI & Output Formatting
+    "colorama==0.4.6",    # Terminal color support
+    "rich==14.1.0",        # Rich text and formatting
+    "typer==0.16.1",       # CLI app framework
+
+    # Data Validation & Parsing
+    "email-validator==2.2.0",   # Email validation
+    "openapi-core==0.19.5",     # OpenAPI request/response validation
+    "openapi-pydantic==0.5.1",  # OpenAPI schema parsing
+    "pydantic==2.11.7",         # Data validation and settings management
+
+    # Domain-Specific
+    "fastmcp==2.12.0",          # TIBCO MCP automation
+
+    # Web Framework & API
+    "flask-cors==6.0.1",        # CORS for Flask
+    "waitress==3.0.2",          # WSGI server
+    "websockets==15.0.1",       # WebSocket support
+
+    # Automation & Browser Testing
+    "playwright==1.54.0",       # Browser automation
+
+    # Testing
+    "pytest-html==4.1.1",       # HTML test reports
+    "pytest-rerunfailures==15.1", # Rerun failed tests
+    "pytest-xdist==3.8.0",      # Parallel test execution
+
+    # Environment & Utilities
+    "pyperclip==1.9.0",         # Clipboard utilities
+    "python-dotenv==1.1.1",     # .env file support
+    "pytz==2025.2",             # Timezone support
+]

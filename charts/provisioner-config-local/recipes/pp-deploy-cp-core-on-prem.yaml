@@ -14,7 +14,8 @@ meta:
     GUI_CP_CHART_REPO: "https://tibcosoftware.github.io/tp-helm-charts"
     GUI_CP_CHART_REPO_USER_NAME: "cp-test"
     GUI_CP_CHART_REPO_TOKEN: ""
-    GUI_DP_CHART_REPO: "https://tibcosoftware.github.io/tp-helm-charts"
+    GUI_DP_CHART_REPO_HOST: "https://tibcosoftware.github.io"
+    GUI_DP_CHART_REPO_PATH: "tp-helm-charts"
     GUI_DP_CHART_REPO_USER_NAME: "cp-test"
     GUI_DP_CHART_REPO_TOKEN: ""
 
@@ -24,18 +25,30 @@ meta:
     GUI_CP_CONTAINER_REGISTRY_USERNAME: ""
     GUI_CP_CONTAINER_REGISTRY_PASSWORD: ""
 
-    # CP version see: https://docs.tibco.com/pub/platform-cp/1.3.0/doc/html/Default.htm#Installation/helm-chart-version-matrix.htm
-    GUI_CP_PLATFORM_BOOTSTRAP_VERSION: 1.3.53
-    GUI_CP_PLATFORM_BASE_VERSION: 1.3.437
+    # proxy
+    GUI_CP_PROXY_HTTP_PROXY: ""
+    GUI_CP_PROXY_HTTPS_PROXY: ""
+    GUI_CP_PROXY_NO_PROXY: ""
+
+    # CP version see: https://docs.tibco.com/pub/platform-cp/latest/doc/html/Default.htm#Installation/helm-chart-version-matrix.htm
+    GUI_CP_PLATFORM_BOOTSTRAP_VERSION: 1.10.0
+    GUI_CP_PLATFORM_BASE_VERSION: 1.10.0
 
     # CP env
     GUI_CP_INSTANCE_ID: "cp1"
     GUI_CP_NAMESPACE: "cp1-ns"
     GUI_CP_ADMIN_EMAIL: "cp-test@tibco.com"
-    GUI_CP_LOG_ENABLE: false
+    GUI_CP_FROM_REPLY_TO_EMAIL: ""
     GUI_CP_EXTERNAL_ENVIRONMENT: "production"
     GUI_CP_RESOURCES_REQUEST_CPU: "50m"
     GUI_CP_RESOURCES_REQUEST_MEMORY: "50Mi"
+    GUI_CP_GLOBAL_ENABLE_RESOURCE_CONSTRAINTS: true
+    GUI_CP_GLOBAL_USE_SINGLE_NAMESPACE: true
+
+    # network policy
+    GUI_TP_CREATE_NETWORK_POLICIES: false
+
+    # third party
     GUI_CP_EXT_NAMESPACE: "tibco-ext"
 
     # ingress
@@ -46,22 +59,37 @@ meta:
     GUI_CP_BOOTSTRAP_INGRESS_ROUTER: true
     GUI_CP_BOOTSTRAP_INGRESS_HYBRID_PROXY: true
     GUI_TP_GENERATE_CERTIFICATES: false
-    GUI_CP_IDM_IDENTITY_MANAGEMENT_JWT_KEY_STORE_PASSWORD: "easy-to-remember"
+    GUI_TP_TLS_SECRET_NAME_ROUTER: ""
+    GUI_TP_TLS_CERT_ROUTER: ""
+    GUI_TP_TLS_KEY_ROUTER: ""
+    GUI_TP_TLS_SECRET_NAME_HYBRID_PROXY: ""
+    GUI_TP_TLS_CERT_HYBRID_PROXY: ""
+    GUI_TP_TLS_KEY_HYBRID_PROXY: ""
 
     # storage
-    GUI_CP_STORAGE_CLASS: "" # user need to choose based on environment
+    GUI_CP_STORAGE_CLASS: "hostpath" # user need to choose based on environment
     GUI_CP_STORAGE_CREATE_PV: false
     GUI_CP_STORAGE_PV_NAME: "" # control-plane-pv the name of PV for kind
     GUI_CP_STORAGE_PV_SIZE: "10Gi"
+    GUI_CP_STORAGE_PVC_NAME: ""
+
+    # logging
+    GUI_CP_LOG_ENABLE: true
+    GUI_CP_LOG_ENDPOINT: ""
+    GUI_CP_LOG_USERNAME: "" # optional logserver username, if using ELK stack
+    GUI_CP_LOG_PASSWORD: "" # optional logserver password, if using ELK stack
+    GUI_CP_LOG_INDEX: "tibco-cp-logs" # optional logserver index, default is tibco-cp-logs
 
     # email
-    GUI_CP_MAIL_SERVER_TYPE: "smtp" # smtp, ses, sendgrid
+    GUI_CP_MAIL_SERVER_TYPE: "smtp" # smtp, ses, sendgrid, graph
     GUI_CP_MAIL_SERVER_SES_ARN: ""
     GUI_CP_MAIL_SERVER_SENDGRID_API_KEY: ""
     GUI_CP_MAIL_SERVER_ADDRESS: ""
     GUI_CP_MAIL_SERVER_PORT_NUMBER: "1025"
     GUI_CP_MAIL_SERVER_USERNAME: ""
     GUI_CP_MAIL_SERVER_PASSWORD: ""
+    GUI_CP_MAIL_SERVER_GRAPH_CLIENT_DETAILS_SECRET_NAME: ""
+    GUI_CP_MAIL_SERVER_GRAPH_SKIP_SENT_FOLDER: ""
 
     # DB the default value is for postgres pod
     GUI_CP_DB_HOST: "postgresql.tibco-ext.svc.cluster.local"
@@ -90,9 +118,9 @@ meta:
     GUI_CP_INSTALL_HAWK: true
     GUI_CP_INSTALL_RECIPES: true
     GUI_CP_INSTALL_INTEGRATION: true
-    GUI_CP_INSTALL_INTEGRATION_BWCE: true
+    GUI_CP_INSTALL_INTEGRATION_BW: true
     GUI_CP_INSTALL_INTEGRATION_BWCE_UTILITIES: true
-    GUI_CP_INSTALL_INTEGRATION_BW5: true
+    GUI_CP_INSTALL_INTEGRATION_BW5CE_UTILITIES: true
     GUI_CP_INSTALL_INTEGRATION_FLOGO: true
     GUI_CP_INSTALL_INTEGRATION_FLOGO_UTILITIES: true
   globalEnvVariable:
@@ -105,7 +133,8 @@ meta:
     CP_CHART_REPO: ${GUI_CP_CHART_REPO:-"https://tibcosoftware.github.io/tp-helm-charts"} # TIBCO Platform CP public repo
     CP_CHART_REPO_USER_NAME: ${GUI_CP_CHART_REPO_USER_NAME:-"cp-test"}
     CP_CHART_REPO_TOKEN: ${GUI_CP_CHART_REPO_TOKEN:-""}
-    DP_CHART_REPO: ${GUI_DP_CHART_REPO:-"https://tibcosoftware.github.io/tp-helm-charts"} # TIBCO Platform DP public repo
+    DP_CHART_REPO_HOST: ${GUI_DP_CHART_REPO_HOST:-"https://tibcosoftware.github.io"} # used in CP platform-base global.tibco.helm.url
+    DP_CHART_REPO_PATH: ${GUI_DP_CHART_REPO_PATH:-"tp-helm-charts"}
     DP_CHART_REPO_USER_NAME: ${GUI_DP_CHART_REPO_USER_NAME:-"cp-test"}
     DP_CHART_REPO_TOKEN: ${GUI_DP_CHART_REPO_TOKEN:-""}
 
@@ -115,34 +144,52 @@ meta:
     CP_CONTAINER_REGISTRY_USERNAME: "${GUI_CP_CONTAINER_REGISTRY_USERNAME}"
     CP_CONTAINER_REGISTRY_PASSWORD: "${GUI_CP_CONTAINER_REGISTRY_PASSWORD}"
 
+    # CP proxy
+    CP_PROXY_HTTP_PROXY: ${GUI_CP_PROXY_HTTP_PROXY:-""}
+    CP_PROXY_HTTPS_PROXY: ${GUI_CP_PROXY_HTTPS_PROXY:-""}
+    CP_PROXY_NO_PROXY: ${GUI_CP_PROXY_NO_PROXY:-""}
+
     # env
     CP_CLUSTER_NAME: ${GUI_CP_CLUSTER_NAME:-"cp-cluster"}
     CP_INSTANCE_ID: ${GUI_CP_INSTANCE_ID:-"cp1"}
     CP_NAMESPACE: ${GUI_CP_NAMESPACE:-"${CP_INSTANCE_ID}-ns"}
     CP_ADMIN_EMAIL: ${GUI_CP_ADMIN_EMAIL:-"cp-test@gmail.com"}
     CP_FROM_REPLY_TO_EMAIL: ${GUI_CP_FROM_REPLY_TO_EMAIL:-""}
-    CP_LOG_ENABLE: ${GUI_CP_LOG_ENABLE:-false}
     CP_EXTERNAL_ENVIRONMENT: ${GUI_CP_EXTERNAL_ENVIRONMENT:-"production"}
     CP_RESOURCES_REQUEST_CPU: ${GUI_CP_RESOURCES_REQUEST_CPU:-"50m"} # 37 pods * 50m = 1850m
     CP_RESOURCES_REQUEST_MEMORY: ${GUI_CP_RESOURCES_REQUEST_MEMORY:-"50Mi"} # 37 pods * 50Mi = 1850Mi
+    CP_GLOBAL_ENABLE_RESOURCE_CONSTRAINTS: ${GUI_CP_GLOBAL_ENABLE_RESOURCE_CONSTRAINTS:-true}
+    CP_GLOBAL_USE_SINGLE_NAMESPACE: ${GUI_CP_GLOBAL_USE_SINGLE_NAMESPACE:-true}
 
     # domain
     CP_DNS_DOMAIN: ${GUI_CP_DNS_DOMAIN:-"localhost.dataplanes.pro"}
     CP_SERVICE_DNS_DOMAIN: ${CP_INSTANCE_ID}-my.${CP_DNS_DOMAIN}
     CP_TUNNEL_DNS_DOMAIN: ${CP_INSTANCE_ID}-tunnel.${CP_DNS_DOMAIN}
+
     # storage
     CP_STORAGE_CLASS: ${GUI_CP_STORAGE_CLASS:-"standard"} # standard, gp2, hostpath, efs-sc
     CP_STORAGE_PV_NAME: "${GUI_CP_STORAGE_PV_NAME}" # control-plane-pv the name of PV for kind, works with CP_STORAGE_CREATE_PV flag
     CP_STORAGE_PV_SIZE: "${GUI_CP_STORAGE_PV_SIZE:-10Gi}"
+    CP_STORAGE_PVC_NAME: ${GUI_CP_STORAGE_PVC_NAME:-""} # added in 1.7.0
+
+    # CP logging
+    CP_LOG_ENABLE: ${GUI_CP_LOG_ENABLE:-false}
+    CP_LOG_ENDPOINT: ${GUI_CP_LOG_ENDPOINT:-"https://dp-config-es-es-http.elastic-system.svc.cluster.local:9200"} # optional logserver endpoint
+    CP_LOG_USERNAME: ${GUI_CP_LOG_USERNAME:-"elastic"} # optional logserver username
+    CP_LOG_PASSWORD: ${GUI_CP_LOG_PASSWORD:-""} # optional logserver password
+    CP_LOG_INDEX: ${GUI_CP_LOG_INDEX:-"tibco-cp-logs"} # optional logserver index, default is tibco-cp-logs
+
+    # network policies
+    TP_CREATE_NETWORK_POLICIES: ${GUI_TP_CREATE_NETWORK_POLICIES:-false}
 
     # node
-    CP_NODE_CIDR: ${GUI_TP_CLUSTER_NODE_CIDR:-"10.180.0.0/16"}
-    CP_POD_CIDR: ${GUI_TP_CLUSTER_POD_CIDR:-"10.180.0.0/16"}
-    CP_SERVICE_CIDR: ${GUI_TP_SERVICE_CIDR:-"10.96.0.0/12"}
+    TP_CLUSTER_NODE_CIDR: ${GUI_TP_CLUSTER_NODE_CIDR:-"10.180.0.0/16"}
+    TP_CLUSTER_POD_CIDR: ${GUI_TP_CLUSTER_POD_CIDR:-"10.180.0.0/16"} # for k3s: 10.42.0.0/16 for kind 10.244.0.0/16
+    TP_CLUSTER_SERVICE_CIDR: ${GUI_TP_CLUSTER_SERVICE_CIDR:-"10.96.0.0/12"} # for k3s: 10.43.0.0/16 for kind 10.96.0.0/16
+
     # third party
     CP_EXT_NAMESPACE: ${GUI_CP_EXT_NAMESPACE:-"tibco-ext"}
-    # network policies
-    CP_CREATE_NETWORK_POLICIES: ${GUI_CP_CREATE_NETWORK_POLICIES:-false}
+
     # CP DB setup env
     CP_DB_HOST: ${GUI_CP_DB_HOST:-"postgresql.tibco-ext.svc.cluster.local"} #
     CP_DB_PORT: ${GUI_CP_DB_PORT:-"5432"}
@@ -153,8 +200,11 @@ meta:
     CP_DB_SSL_MODE: ${GUI_CP_DB_SSL_MODE:-"disable"} # verify-full, disable
     CP_DB_SSL_ROOT_CERT: ${GUI_CP_DB_SSL_ROOT_CERT:-""}
     CP_DB_DELETE_ON_UNINSTALL: ${GUI_CP_DB_DELETE_ON_UNINSTALL:-"false"}
+    CP_ENCRYPTION_SECRET_NAME: ${GUI_CP_ENCRYPTION_SECRET_NAME:-"cporch-encryption-secret"}
+    CP_ENCRYPTION_SECRET_KEY: ${GUI_CP_ENCRYPTION_SECRET_KEY:-"CP_ENCRYPTION_SECRET"}
     CP_DB_SSL_ROOT_CERT_SECRET_NAME: ${GUI_CP_DB_SSL_ROOT_CERT_SECRET_NAME:-"db-ssl-root-cert"}
     CP_DB_SSL_ROOT_CERT_FILENAME: ${GUI_CP_DB_SSL_ROOT_CERT_FILENAME:-"db_ssl_root.cert"}
+
     # CP mail server
     CP_MAIL_MAILDEV_SERVICE_NAME: ${GUI_CP_MAIL_MAILDEV_SERVICE_NAME:-"development-mailserver"}
     CP_MAIL_SERVER_TYPE: ${GUI_CP_MAIL_SERVER_TYPE:-"smtp"} # smtp, ses, sendgrid
@@ -164,8 +214,9 @@ meta:
     CP_MAIL_SERVER_PORT_NUMBER: ${GUI_CP_MAIL_SERVER_PORT_NUMBER:-"1025"}
     CP_MAIL_SERVER_USERNAME: ${GUI_CP_MAIL_SERVER_USERNAME:-""}
     CP_MAIL_SERVER_PASSWORD: ${GUI_CP_MAIL_SERVER_PASSWORD:-""}
-    # CP SSO
-    CP_IDM_IDENTITY_MANAGEMENT_JWT_KEY_STORE_PASSWORD: ${GUI_CP_IDM_IDENTITY_MANAGEMENT_JWT_KEY_STORE_PASSWORD:-"easy-to-remember"}
+    CP_MAIL_SERVER_GRAPH_CLIENT_DETAILS_SECRET_NAME: ${GUI_CP_MAIL_SERVER_GRAPH_CLIENT_DETAILS_SECRET_NAME:-""} # the secret name for graph client details
+    CP_MAIL_SERVER_GRAPH_SKIP_SENT_FOLDER: ${GUI_CP_MAIL_SERVER_GRAPH_SKIP_SENT_FOLDER:-false}
+
     # CP ingress
     CP_INGRESS_CLASSNAME: ${GUI_CP_INGRESS_CLASSNAME:-nginx} # the ingress for CP
     CP_BOOTSTRAP_INGRESS_ROUTER: ${GUI_CP_BOOTSTRAP_INGRESS_ROUTER:-true} # set to false will create ingress for router and hybrid-proxy
@@ -177,9 +228,17 @@ meta:
     TP_GENERATE_CERTIFICATES: ${GUI_TP_GENERATE_CERTIFICATES:-true} # if true, will create cluster issuer and certificate for tp-certificate using cert-manager. For local use set to false
     TP_GENERATE_CERTIFICATE_NAME: tp-certificate-${CP_INSTANCE_ID}
     TP_CERTIFICATE_CLUSTER_ISSUER: ${GUI_TP_CERTIFICATE_CLUSTER_ISSUER:-"tp-prod"} # the cluster issuer for tp-certificate
-    # CP version see: https://docs.tibco.com/pub/platform-cp/1.3.0/doc/html/Default.htm#Installation/helm-chart-version-matrix.htm
-    CP_PLATFORM_BOOTSTRAP_VERSION: ${GUI_CP_PLATFORM_BOOTSTRAP_VERSION:-1.3.53} # use ^1.0.0 for latest
-    CP_PLATFORM_BASE_VERSION: ${GUI_CP_PLATFORM_BASE_VERSION:-1.3.437} # use ^1.0.0 for latest
+    TP_TLS_SECRET_NAME_ROUTER: ${GUI_TP_TLS_SECRET_NAME_ROUTER:-""} # the secret name for router ingress
+    TP_TLS_CERT_ROUTER: ${GUI_TP_TLS_CERT_ROUTER:-""} # the tls.crt for router ingress
+    TP_TLS_KEY_ROUTER: ${GUI_TP_TLS_KEY_ROUTER:-""} # the tls.key for router ingress
+    TP_TLS_SECRET_NAME_HYBRID_PROXY: ${GUI_TP_TLS_SECRET_NAME_HYBRID_PROXY:-""} # the secret name for hybrid-proxy ingress
+    TP_TLS_CERT_HYBRID_PROXY: ${GUI_TP_TLS_CERT_HYBRID_PROXY:-""} # the tls.crt for hybrid-proxy ingress
+    TP_TLS_KEY_HYBRID_PROXY: ${GUI_TP_TLS_KEY_HYBRID_PROXY:-""} # the tls.key for hybrid-proxy ingress
+
+    # CP version see: https://docs.tibco.com/pub/platform-cp/latest/doc/html/Default.htm#Installation/helm-chart-version-matrix.htm
+    CP_PLATFORM_BOOTSTRAP_VERSION: ${GUI_CP_PLATFORM_BOOTSTRAP_VERSION:-1.10.0} # use ^1.0.0 for latest
+    CP_PLATFORM_BASE_VERSION: ${GUI_CP_PLATFORM_BASE_VERSION:-1.10.0} # use ^1.0.0 for latest
+
     # flow control
     CP_VALIDATE_CLUSTER_RESOURCE: ${GUI_CP_VALIDATE_CLUSTER_RESOURCE:-true}
     CP_CREATE_NAMESPACE: ${GUI_CP_CREATE_NAMESPACE:-true}
@@ -190,12 +249,13 @@ meta:
     CP_INSTALL_PLATFORM_BASE: ${GUI_CP_INSTALL_PLATFORM_BASE:-true}
     CP_INSTALL_TIBCOHUB_CONTRIB: ${GUI_CP_INSTALL_TIBCOHUB_CONTRIB:-true}
     CP_INSTALL_MSG_CONTRIB: ${GUI_CP_INSTALL_MSG_CONTRIB:-true}
+    CP_INSTALL_MSG_RECIPES: ${GUI_CP_INSTALL_MSG_RECIPES:-true}
     CP_INSTALL_HAWK: ${GUI_CP_INSTALL_HAWK:-true}
     CP_INSTALL_RECIPES: ${GUI_CP_INSTALL_RECIPES:-true}
     CP_INSTALL_INTEGRATION: ${GUI_CP_INSTALL_INTEGRATION:-true}
-    CP_INSTALL_INTEGRATION_BWCE: ${GUI_CP_INSTALL_INTEGRATION_BWCE:-true}
+    CP_INSTALL_INTEGRATION_BW: ${GUI_CP_INSTALL_INTEGRATION_BW:-true} # Env added after 1.8.0
     CP_INSTALL_INTEGRATION_BWCE_UTILITIES: ${GUI_CP_INSTALL_INTEGRATION_BWCE_UTILITIES:-true}
-    CP_INSTALL_INTEGRATION_BW5: ${GUI_CP_INSTALL_INTEGRATION_BW5:-true}
+    CP_INSTALL_INTEGRATION_BW5CE_UTILITIES: ${GUI_CP_INSTALL_INTEGRATION_BW5CE_UTILITIES:-true} # Env for before 1.8.0
     CP_INSTALL_INTEGRATION_FLOGO: ${GUI_CP_INSTALL_INTEGRATION_FLOGO:-true}
     CP_INSTALL_INTEGRATION_FLOGO_UTILITIES: ${GUI_CP_INSTALL_INTEGRATION_FLOGO_UTILITIES:-true}
   tools:
@@ -258,7 +318,6 @@ preTasks:
 
       # service account
       kubectl create -n ${CP_NAMESPACE} serviceaccount ${CP_INSTANCE_ID}-sa
-      kubectl create clusterrolebinding ${CP_INSTANCE_ID}-sa --clusterrole=cluster-admin --serviceaccount=${CP_NAMESPACE}:${CP_INSTANCE_ID}-sa
       
       # DB password
       kubectl apply -f - <<EOF
@@ -289,7 +348,37 @@ preTasks:
         tls.key: ${TP_TLS_KEY}
       EOF
       fi
-      
+
+      # create TP TLS secret for router if provided
+      if [[ -n "${TP_TLS_CERT_ROUTER}" ]]; then
+        kubectl apply -f - <<EOF
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: ${TP_TLS_SECRET_NAME_ROUTER}
+        namespace: ${CP_NAMESPACE}
+      type: Opaque
+      data:
+        tls.crt: ${TP_TLS_CERT_ROUTER}
+        tls.key: ${TP_TLS_KEY_ROUTER}
+      EOF
+      fi
+
+      # create TP TLS secret for hybrid proxy if provided
+      if [[ -n "${TP_TLS_CERT_HYBRID_PROXY}" ]]; then
+        kubectl apply -f - <<EOF
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: ${TP_TLS_SECRET_NAME_HYBRID_PROXY}
+        namespace: ${CP_NAMESPACE}
+      type: Opaque
+      data:
+        tls.crt: ${TP_TLS_CERT_HYBRID_PROXY}
+        tls.key: ${TP_TLS_KEY_HYBRID_PROXY}
+      EOF
+      fi
+
       # add label to ext namespace
       kubectl apply -f - <<EOF
       apiVersion: v1
@@ -341,7 +430,7 @@ helmCharts:
             - '*.${CP_SERVICE_DNS_DOMAIN}'
             - '*.${CP_TUNNEL_DNS_DOMAIN}'
   flags:
-    createNamespace: true
+    createNamespace: ${CP_CREATE_NAMESPACE}
     timeout: 1h
 - name: generic-chart # CP pv object helm chart
   version: 1.1.0
@@ -372,7 +461,7 @@ helmCharts:
           volumeMode: Filesystem
           storageClassName: ${CP_STORAGE_CLASS}
   flags:
-    createNamespace: true
+    createNamespace: ${CP_CREATE_NAMESPACE}
     timeout: 1h
 - name: generic-chart # maildev helm chart
   version: 1.1.0
@@ -420,7 +509,6 @@ helmCharts:
         labels:
           app.cloud.tibco.com/created-by: pipeline
         annotations:
-          kubernetes.io/ingress.class: ${CP_INGRESS_CLASSNAME}
           nginx.ingress.kubernetes.io/proxy-buffer-size: 16k
         spec:
           ingressClassName: ${CP_INGRESS_CLASSNAME}
@@ -453,85 +541,66 @@ helmCharts:
   values:
     keepPrevious: false
     content: |
-      tp-cp-bootstrap:
-        compute-services:
-          enabled: true
-          resources:
-            requests:
-              cpu: ${CP_RESOURCES_REQUEST_CPU}
-              memory: ${CP_RESOURCES_REQUEST_MEMORY}
-            limits:
-              cpu: 1250m
-              memory: 1000Mi
-          dpHelmRepositories:
-            - alias: default
-              conf:
-                auth:
-                  password: ${DP_CHART_REPO_TOKEN}
-                  username: ${DP_CHART_REPO_USER_NAME}
-                repoUrl: ${DP_CHART_REPO}
-              default: true
-              type: chart-museum
-        hybrid-proxy:
-          enabled: true
-          resources:
-            requests:
-              cpu: ${CP_RESOURCES_REQUEST_CPU}
-              memory: ${CP_RESOURCES_REQUEST_MEMORY}
-            limits:
-              cpu: 1250m
-              memory: 1000Mi
-          ingress:
-            enabled: ${CP_BOOTSTRAP_INGRESS_HYBRID_PROXY}
-            annotations:
-              external-dns.alpha.kubernetes.io/hostname: "*.${CP_TUNNEL_DNS_DOMAIN}"
-              nginx.ingress.kubernetes.io/proxy-buffer-size: 16k
-            ingressClassName: ${CP_INGRESS_CLASSNAME}
-            hosts:
-              - host: '*.${CP_TUNNEL_DNS_DOMAIN}'
-                paths:
-                  - path: /
-                    pathType: Prefix
-                    port: 105
-        router-operator:
-          enabled: true
-          resources:
-            requests:
-              cpu: ${CP_RESOURCES_REQUEST_CPU}
-              memory: ${CP_RESOURCES_REQUEST_MEMORY}
-            limits:
-              cpu: 3000m
-              memory: 1000Mi
-          ingress:
-            enabled: ${CP_BOOTSTRAP_INGRESS_ROUTER}
-            annotations:
-              external-dns.alpha.kubernetes.io/hostname: "*.${CP_SERVICE_DNS_DOMAIN}"
-              nginx.ingress.kubernetes.io/proxy-buffer-size: 16k
-              nginx.ingress.kubernetes.io/proxy-body-size: 200m # set to 200m to allow large file upload PCP-7954
-            ingressClassName: ${CP_INGRESS_CLASSNAME}
-            hosts:
-              - host: '*.${CP_SERVICE_DNS_DOMAIN}'
-                paths:
-                  - path: /
-                    pathType: Prefix
-                    port: 100
-        resource-set-operator:
-          enabled: true
-          resources:
-            requests:
-              cpu: ${CP_RESOURCES_REQUEST_CPU}
-              memory: ${CP_RESOURCES_REQUEST_MEMORY}
-            limits:
-              cpu: 1000m
-              memory: 1000Mi
-        otel-collector:
-          enabled: false
+      hybrid-proxy:
+        enabled: true
+        resources:
+          requests:
+            cpu: ${CP_RESOURCES_REQUEST_CPU}
+            memory: ${CP_RESOURCES_REQUEST_MEMORY}
+          limits:
+            cpu: 1250m
+            memory: 1000Mi
+        ingress:
+          enabled: ${CP_BOOTSTRAP_INGRESS_HYBRID_PROXY}
+          annotations:
+            external-dns.alpha.kubernetes.io/hostname: "*.${CP_TUNNEL_DNS_DOMAIN}"
+            nginx.ingress.kubernetes.io/proxy-buffer-size: 16k
+          ingressClassName: ${CP_INGRESS_CLASSNAME}
+          hosts:
+            - host: '*.${CP_TUNNEL_DNS_DOMAIN}'
+              paths:
+                - path: /
+                  pathType: Prefix
+                  port: 105
+      router-operator:
+        enabled: true
+        resources:
+          requests:
+            cpu: ${CP_RESOURCES_REQUEST_CPU}
+            memory: ${CP_RESOURCES_REQUEST_MEMORY}
+          limits:
+            cpu: 3000m
+            memory: 1000Mi
+        ingress:
+          enabled: ${CP_BOOTSTRAP_INGRESS_ROUTER}
+          annotations:
+            external-dns.alpha.kubernetes.io/hostname: "*.${CP_SERVICE_DNS_DOMAIN}"
+            nginx.ingress.kubernetes.io/proxy-buffer-size: 16k
+            nginx.ingress.kubernetes.io/proxy-body-size: 200m # set to 200m to allow large file upload PCP-7954
+          ingressClassName: ${CP_INGRESS_CLASSNAME}
+          hosts:
+            - host: '*.${CP_SERVICE_DNS_DOMAIN}'
+              paths:
+                - path: /
+                  pathType: Prefix
+                  port: 100
+      resource-set-operator:
+        enabled: true
+        resources:
+          requests:
+            cpu: ${CP_RESOURCES_REQUEST_CPU}
+            memory: ${CP_RESOURCES_REQUEST_MEMORY}
+          limits:
+            cpu: 1000m
+            memory: 1000Mi
+      otel-collector:
+        enabled: ${CP_LOG_ENABLE}
       global:
         external:
           clusterInfo:
-            nodeCIDR: ${CP_NODE_CIDR}
-            podCIDR: ${CP_POD_CIDR}
-            serviceCIDR: ${CP_SERVICE_CIDR}
+            nodeCIDR: ${TP_CLUSTER_NODE_CIDR}
+            podCIDR: ${TP_CLUSTER_POD_CIDR}
+            serviceCIDR: ${TP_CLUSTER_SERVICE_CIDR}
           dnsDomain: ${CP_SERVICE_DNS_DOMAIN}
           dnsTunnelDomain: ${CP_TUNNEL_DNS_DOMAIN}
           storage:
@@ -539,6 +608,11 @@ helmCharts:
               requests:
                 storage: ${CP_STORAGE_PV_SIZE}
             storageClassName: ${CP_STORAGE_CLASS}
+          logserver:
+            endpoint: "${CP_LOG_ENDPOINT}" # optional logserver endpoint, if you have ELK stack or other logging solution
+            username: "${CP_LOG_USERNAME}" # optional logserver username
+            password: "${CP_LOG_PASSWORD}" # optional logserver password
+            index: "${CP_LOG_INDEX}" # optional logserver index
         tibco:
           logging:
             fluentbit:
@@ -548,9 +622,15 @@ helmCharts:
             password: "${CP_CONTAINER_REGISTRY_PASSWORD}"
             username: "${CP_CONTAINER_REGISTRY_USERNAME}"
             repository: "${CP_CONTAINER_REGISTRY_REPOSITORY}"
+          proxy:
+            httpProxy: "${CP_PROXY_HTTP_PROXY}"
+            httpsProxy: "${CP_PROXY_HTTPS_PROXY}"
+            noProxy: "${CP_PROXY_NO_PROXY}"
           controlPlaneInstanceId: ${CP_INSTANCE_ID}
           serviceAccount: ${CP_INSTANCE_ID}-sa
-          createNetworkPolicy: ${CP_CREATE_NETWORK_POLICIES}
+          createNetworkPolicy: ${TP_CREATE_NETWORK_POLICIES}
+          enableResourceConstraints: ${CP_GLOBAL_ENABLE_RESOURCE_CONSTRAINTS}
+          useSingleNamespace: ${CP_GLOBAL_USE_SINGLE_NAMESPACE}
   cluster:
     names:
       - ${CP_CLUSTER_NAME}
@@ -559,8 +639,8 @@ helmCharts:
   flags:
     wait: true
     timeout: 1h
-    createNamespace: true
-    extra: "--values tls_values.yaml --values volume_values.yaml"
+    createNamespace: ${CP_CREATE_NAMESPACE}
+    extra: "--values tls_values.yaml --values tls_router_values.yaml --values tls_hybrid_proxy_values.yaml --values volume_values.yaml --values log_values.yaml"
   hooks:
     preDeploy:
       ignoreErrors: false
@@ -574,23 +654,104 @@ helmCharts:
           export _star_tunnel_dns="'*.${CP_TUNNEL_DNS_DOMAIN}'"
           export _tp_generate_certificate_name="${TP_GENERATE_CERTIFICATE_NAME}"
           yq eval '
-            (.tp-cp-bootstrap.router-operator.ingress.tls[0].secretName = env(_tp_generate_certificate_name)) |
-            (.tp-cp-bootstrap.router-operator.ingress.tls[0].hosts[0] = env(_star_service_dns)) |
-            (.tp-cp-bootstrap.router-operator.ingress.tls[0].hosts[0] style="single") |
-            (.tp-cp-bootstrap.hybrid-proxy.ingress.tls[0].secretName = env(_tp_generate_certificate_name)) |
-            (.tp-cp-bootstrap.hybrid-proxy.ingress.tls[0].hosts[0] = env(_star_tunnel_dns)) |
-            (.tp-cp-bootstrap.hybrid-proxy.ingress.tls[0].hosts[0] style="single")
+            (.router-operator.ingress.tls[0].secretName = env(_tp_generate_certificate_name)) |
+            (.router-operator.ingress.tls[0].hosts[0] = env(_star_service_dns)) |
+            (.router-operator.ingress.tls[0].hosts[0] style="single") |
+            (.hybrid-proxy.ingress.tls[0].secretName = env(_tp_generate_certificate_name)) |
+            (.hybrid-proxy.ingress.tls[0].hosts[0] = env(_star_tunnel_dns)) |
+            (.hybrid-proxy.ingress.tls[0].hosts[0] style="single")
             ' tls_values.yaml > tls_values.yaml
           
           echo "TLS values:"
           cat tls_values.yaml
         fi
+
+        touch tls_router_values.yaml
+        if [[ -n "${TP_TLS_SECRET_NAME_ROUTER}" ]]; then
+          export _star_service_dns="'*.${CP_SERVICE_DNS_DOMAIN}'"
+          export _tp_router_certificate_name="${TP_TLS_SECRET_NAME_ROUTER}"
+          yq eval '
+            (.router-operator.ingress.tls[0].secretName = env(_tp_router_certificate_name)) |
+            (.router-operator.ingress.tls[0].hosts[0] = env(_star_service_dns)) |
+            (.router-operator.ingress.tls[0].hosts[0] style="single")
+            ' tls_router_values.yaml > tls_router_values.yaml
+          
+          echo "TLS Router values:"
+          cat tls_router_values.yaml
+        fi
+
+        touch tls_hybrid_proxy_values.yaml
+        if [[ -n "${TP_TLS_SECRET_NAME_HYBRID_PROXY}" ]]; then
+          export _star_tunnel_dns="'*.${CP_TUNNEL_DNS_DOMAIN}'"
+          export _tp_hybrid_proxy_certificate_name="${TP_TLS_SECRET_NAME_HYBRID_PROXY}"
+          yq eval '
+            (.hybrid-proxy.ingress.tls[0].secretName = env(_tp_hybrid_proxy_certificate_name)) |
+            (.hybrid-proxy.ingress.tls[0].hosts[0] = env(_star_tunnel_dns)) |
+            (.hybrid-proxy.ingress.tls[0].hosts[0] style="single")
+            ' tls_hybrid_proxy_values.yaml > tls_hybrid_proxy_values.yaml
+          
+          echo "TLS Hybrid Proxy values:"
+          cat tls_hybrid_proxy_values.yaml
+        fi
+
         touch volume_values.yaml
         if [[ "${CP_STORAGE_PV_NAME}" != "" ]]; then
           yq eval '.global.external.storage.volumeName = env(CP_STORAGE_PV_NAME)' volume_values.yaml > volume_values.yaml
           echo "Volume values:"
           cat volume_values.yaml
         fi
+        
+        if [[ "${CP_STORAGE_PVC_NAME}" != "" ]]; then
+          yq eval '.global.external.storage.pvcName = env(CP_STORAGE_PVC_NAME)' volume_values.yaml > volume_values.yaml
+          echo "PVC values:"
+          cat volume_values.yaml
+        fi
+
+        touch log_values.yaml
+        if [[ "${CP_LOG_ENABLE}" == "true" && -z "${CP_LOG_PASSWORD}" ]]; then
+          # update es logging password
+          export HOOK_CP_LOG_PASSWORD=$(kubectl get secret -n elastic-system dp-config-es-es-elastic-user -o=jsonpath='{.data.elastic}' 2>/dev/null | base64 --decode)
+          if [[ -n "${HOOK_CP_LOG_PASSWORD}" ]]; then
+            yq eval '.global.external.logserver.password = env(HOOK_CP_LOG_PASSWORD)' log_values.yaml > log_values.tmp.yaml
+          else
+            echo "Log server password not found, please set it in the recipe"
+            echo "disable otel-collector"
+            yq eval '.otel-collector.enabled = false' log_values.yaml > log_values.tmp.yaml
+          fi
+          mv log_values.tmp.yaml log_values.yaml
+          echo "Log values:"
+          cat log_values.yaml
+        fi
+        TSC_SESSION_KEY=$(kubectl get tibcoclusterenv ops.tsc.session.key -n $CP_NAMESPACE -o jsonpath='{.spec.value}')
+        DOMAIN_SESSION_KEY=$(kubectl get tibcoclusterenv ops.domain.session.key -n $CP_NAMESPACE -o jsonpath='{.spec.value}')
+        if [[ -n "${TSC_SESSION_KEY}" && -n "${DOMAIN_SESSION_KEY}" ]]; then
+          if kubectl get secret -n $CP_NAMESPACE session-keys --ignore-not-found | grep -q session-keys; then
+            echo "session-keys secret already exists, not creating a new one"
+          else
+            echo "Found session keys in tibcoclusterenv, creating session-keys secret using existing tibcoclusterenv values"
+            kubectl create secret -n $CP_NAMESPACE generic session-keys --from-literal=TSC_SESSION_KEY=$TSC_SESSION_KEY --from-literal=DOMAIN_SESSION_KEY=$DOMAIN_SESSION_KEY
+          fi
+        else
+          if kubectl get secret -n $CP_NAMESPACE session-keys --ignore-not-found | grep -q session-keys; then
+            echo "session-keys secret already exists, not creating a new one"
+          else
+            echo "session-keys secret not found, creating a new one using random values"
+            kubectl create secret -n $CP_NAMESPACE generic session-keys --from-literal=TSC_SESSION_KEY=$(openssl rand -base64 48 | tr -dc A-Za-z0-9 | head -c32) --from-literal=DOMAIN_SESSION_KEY=$(openssl rand -base64 48 | tr -dc A-Za-z0-9 | head -c32)
+          fi
+        fi
+    postDeploy:
+      ignoreErrors: false
+      base64Encoded: false
+      skip: false
+      content: |
+        echo ""
+        echo "=== Images deployed by platform-bootstrap chart version ${CP_PLATFORM_BOOTSTRAP_VERSION} ==="
+        printf "%-40s %-20s\n" "Image" "Version"
+        printf "%-40s %-20s\n" "-----" "-------"
+        kubectl get pods -n "${CP_NAMESPACE}" -o jsonpath='{range .items[*]}{range .spec.initContainers[*]}{.image}{"\n"}{end}{range .spec.containers[*]}{.image}{"\n"}{end}{end}' \
+        | awk -F'/' '{print $NF}' \
+        | awk -F':' '{img=$1; ver=$2?$2:"latest"; printf "%-40s %-20s\n", img, ver}' \
+        | sort -u
 - name: platform-base
   version: ${CP_PLATFORM_BASE_VERSION}
   condition: ${CP_INSTALL_PLATFORM_BASE}
@@ -604,13 +765,43 @@ helmCharts:
     content: |
       global:
         tibco:
+          logging:
+            fluentbit:
+              enabled: ${CP_LOG_ENABLE} # set to true to enable fluentbit for CP
+          containerRegistry:
+            url: ${CP_CONTAINER_REGISTRY}
+            password: "${CP_CONTAINER_REGISTRY_PASSWORD}"
+            username: "${CP_CONTAINER_REGISTRY_USERNAME}"
+            repository: "${CP_CONTAINER_REGISTRY_REPOSITORY}"
+          proxy:
+            httpProxy: "${CP_PROXY_HTTP_PROXY}"
+            httpsProxy: "${CP_PROXY_HTTPS_PROXY}"
+            noProxy: "${CP_PROXY_NO_PROXY}"
+          controlPlaneInstanceId: ${CP_INSTANCE_ID}
+          serviceAccount: ${CP_INSTANCE_ID}-sa
+          createNetworkPolicy: ${TP_CREATE_NETWORK_POLICIES}
+          enableResourceConstraints: ${CP_GLOBAL_ENABLE_RESOURCE_CONSTRAINTS}
+          useSingleNamespace: ${CP_GLOBAL_USE_SINGLE_NAMESPACE}
           db_ssl_root_cert_secretname: "${CP_DB_SSL_ROOT_CERT_SECRET_NAME}"
           db_ssl_root_cert_filename: "${CP_DB_SSL_ROOT_CERT_FILENAME}"
+          helm:
+            url: "${DP_CHART_REPO_HOST}"
+            repo: "${DP_CHART_REPO_PATH}"
+            username: "${DP_CHART_REPO_USER_NAME}"
+            password: "${DP_CHART_REPO_TOKEN}"
         cp:
           deleteDBOnUninstall: "${CP_DB_DELETE_ON_UNINSTALL}"
+          enableResourceConstraints: ${CP_GLOBAL_ENABLE_RESOURCE_CONSTRAINTS}
         external:
+          cpEncryptionSecretName: "${CP_ENCRYPTION_SECRET_NAME}"
+          cpEncryptionSecretKey: "${CP_ENCRYPTION_SECRET_KEY}"
+          clusterInfo:
+            nodeCIDR: ${TP_CLUSTER_NODE_CIDR}
+            podCIDR: ${TP_CLUSTER_POD_CIDR}
+            serviceCIDR: ${TP_CLUSTER_SERVICE_CIDR}
+          dnsDomain: ${CP_SERVICE_DNS_DOMAIN}
+          dnsTunnelDomain: ${CP_TUNNEL_DNS_DOMAIN}
           environment: ${CP_EXTERNAL_ENVIRONMENT}
-          helmRepo: ${CP_CHART_REPO}
           db_host: ${CP_DB_HOST}
           db_name: ${CP_DB_NAME}
           db_password: ${CP_DB_PASSWORD}
@@ -630,26 +821,32 @@ helmCharts:
               port: "${CP_MAIL_SERVER_PORT_NUMBER}"
               username: "${CP_MAIL_SERVER_USERNAME}"
               password: "${CP_MAIL_SERVER_PASSWORD}"
+            graph:
+              clientDetailsSecretName: ${CP_MAIL_SERVER_GRAPH_CLIENT_DETAILS_SECRET_NAME}
+              skipSentFolder: ${CP_MAIL_SERVER_GRAPH_SKIP_SENT_FOLDER}
           fromAndReplyToEmailAddress: "${CP_FROM_REPLY_TO_EMAIL}"
           admin:
             email: ${CP_ADMIN_EMAIL}
             firstname: "admin"
             lastname: "admin"
             customerID: "myCustomerID"
-          enableLogging: false
-          IDENTITY_MANAGEMENT_JWT_KEY_STORE_PASSWORD: "${CP_IDM_IDENTITY_MANAGEMENT_JWT_KEY_STORE_PASSWORD}"
+      tp-cp-infra:
+        enabled: true
+        resources:
+          requests:
+            cpu: ${CP_RESOURCES_REQUEST_CPU}
+            memory: ${CP_RESOURCES_REQUEST_MEMORY}
+          limits:
+            cpu: 1250m
+            memory: 1000Mi
       tp-cp-tibcohub-contrib:
         enabled: ${CP_INSTALL_TIBCOHUB_CONTRIB}
       tp-cp-msg-contrib:
         enabled: ${CP_INSTALL_MSG_CONTRIB}
+      tp-cp-msg-recipes:
+        enabled: ${CP_INSTALL_MSG_RECIPES}
       tp-cp-hawk:
         enabled: ${CP_INSTALL_HAWK}
-        tp-cp-hawk-infra-prometheus:
-          prometheus:
-            resources:
-              requests:
-                cpu: ${CP_RESOURCES_REQUEST_CPU}
-                memory: ${CP_RESOURCES_REQUEST_MEMORY}
       tp-cp-recipes:
         enabled: ${CP_INSTALL_RECIPES}
       tp-cp-integration:
@@ -664,8 +861,8 @@ helmCharts:
               limits:
                 cpu: 200m
                 memory: 200Mi
-        tp-cp-integration-bwce:
-          enabled: ${CP_INSTALL_INTEGRATION_BWCE}
+        tp-cp-integration-bw:
+          enabled: ${CP_INSTALL_INTEGRATION_BW}
           bw-webserver:
             bwwebserver:
               resources:
@@ -675,17 +872,10 @@ helmCharts:
                 limits:
                   cpu: 200m
                   memory: 200Mi
-        tp-cp-integration-bw5:
-          enabled: ${CP_INSTALL_INTEGRATION_BW5}
-          bw5-webserver:
-            bw5webserver:
-              resources:
-                requests:
-                  cpu: ${CP_RESOURCES_REQUEST_CPU}
-                  memory: ${CP_RESOURCES_REQUEST_MEMORY}
-                limits:
-                  cpu: 200m
-                  memory: 200Mi
+        tp-cp-bwce-utilities:
+          enabled: ${CP_INSTALL_INTEGRATION_BWCE_UTILITIES}
+        tp-cp-bw5ce-utilities:
+          enabled: ${CP_INSTALL_INTEGRATION_BW5CE_UTILITIES}
         tp-cp-integration-flogo:
           enabled: ${CP_INSTALL_INTEGRATION_FLOGO}
           flogo-webserver:
@@ -697,17 +887,6 @@ helmCharts:
                 limits:
                   cpu: 200m
                   memory: 200Mi
-        tp-cp-bwce-utilities:
-          enabled: ${CP_INSTALL_INTEGRATION_BWCE_UTILITIES}
-          bwce-utilities:
-            studio:
-              resources:
-                requests:
-                  cpu: ${CP_RESOURCES_REQUEST_CPU}
-                  memory: ${CP_RESOURCES_REQUEST_MEMORY}
-                limits:
-                  cpu: "1"
-                  memory: 2048Mi
         tp-cp-flogo-utilities:
           enabled: ${CP_INSTALL_INTEGRATION_FLOGO_UTILITIES}
       tp-cp-core:
@@ -728,9 +907,6 @@ helmCharts:
               requests:
                 cpu: ${CP_RESOURCES_REQUEST_CPU}
                 memory: ${CP_RESOURCES_REQUEST_MEMORY}
-              limits:
-                cpu: 100m
-                memory: 100Mi
         email-service:
           replicaCount: 1
           cpemailservice:
@@ -802,42 +978,12 @@ helmCharts:
                 cpu: 200m
                 memory: 200Mi
       tp-cp-core-finops:
-        finops-otel-collector:
-          resources:
-            requests:
-              cpu: ${CP_RESOURCES_REQUEST_CPU}
-              memory: ${CP_RESOURCES_REQUEST_MEMORY}
-            limits:
-              cpu: 300m
-              memory: 12Gi
-        finops-prometheus:
-          finopsprometheus:
-            resources:
-              requests:
-                cpu: ${CP_RESOURCES_REQUEST_CPU}
-                memory: ${CP_RESOURCES_REQUEST_MEMORY}
-              limits:
-                cpu: 300m
-                memory: 12Gi
         finops-service:
           finopsservice:
             resources:
               requests:
                 cpu: ${CP_RESOURCES_REQUEST_CPU}
                 memory: ${CP_RESOURCES_REQUEST_MEMORY}
-              limits:
-                cpu: 250m
-                memory: 1024Mi
-        finops-web-server:
-          replicaCount: "1"
-          finopswebserver:
-            resources:
-              requests:
-                cpu: ${CP_RESOURCES_REQUEST_CPU}
-                memory: ${CP_RESOURCES_REQUEST_MEMORY}
-              limits:
-                cpu: 200m
-                memory: 200Mi
         monitoring-service:
           replicaCount: "1"
           monitoringservice:
@@ -845,33 +991,21 @@ helmCharts:
               requests:
                 cpu: ${CP_RESOURCES_REQUEST_CPU}
                 memory: ${CP_RESOURCES_REQUEST_MEMORY}
-              limits:
-                cpu: 250m
-                memory: 1024Mi
           monitoringtibtunnel:
             resources:
               requests:
                 cpu: ${CP_RESOURCES_REQUEST_CPU}
                 memory: ${CP_RESOURCES_REQUEST_MEMORY}
-              limits:
-                cpu: "80m"
-                memory: "200Mi"
           monitoringcapresources:
             resources:
               requests:
                 cpu: ${CP_RESOURCES_REQUEST_CPU}
                 memory: ${CP_RESOURCES_REQUEST_MEMORY}
-              limits:
-                cpu: "80m"
-                memory: "200Mi"
           monitoringhomepagemetrics:
             resources:
               requests:
                 cpu: ${CP_RESOURCES_REQUEST_CPU}
                 memory: ${CP_RESOURCES_REQUEST_MEMORY}
-              limits:
-                cpu: "80m"
-                memory: "200Mi"
   cluster:
     names:
       - ${CP_CLUSTER_NAME}
@@ -880,4 +1014,31 @@ helmCharts:
   flags:
     wait: true
     timeout: 1h
-    createNamespace: true
+    createNamespace: ${CP_CREATE_NAMESPACE}
+  hooks:
+    preDeploy:
+      ignoreErrors: false
+      base64Encoded: false
+      skip: false
+      content: |
+        if kubectl get secret -n $CP_NAMESPACE $CP_ENCRYPTION_SECRET_NAME --ignore-not-found | grep -q $CP_ENCRYPTION_SECRET_NAME; then
+          echo "$CP_ENCRYPTION_SECRET_NAME secret already exists, not creating a new one"
+          echo "Annotating the secret with helm.sh/resource-policy=keep so that it doesn't get deleted by helm upgrade"
+          kubectl annotate secret $CP_ENCRYPTION_SECRET_NAME helm.sh/resource-policy=keep --overwrite -n $CP_NAMESPACE
+        else
+          echo "CP_ENCRYPTION_SECRET_NAME secret not found, Creating a new secret with random value"
+          kubectl create secret -n $CP_NAMESPACE generic $CP_ENCRYPTION_SECRET_NAME --from-literal=$CP_ENCRYPTION_SECRET_KEY=$(openssl rand -base64 48 | tr -dc A-Za-z0-9 | head -c44)
+        fi
+    postDeploy:
+      ignoreErrors: false
+      base64Encoded: false
+      skip: false
+      content: |
+        echo ""
+        echo "=== Images deployed by platform-base chart version ${CP_PLATFORM_BASE_VERSION} ==="
+        printf "%-40s %-20s\n" "Image" "Version"
+        printf "%-40s %-20s\n" "-----" "-------"
+        kubectl get pods -n "${CP_NAMESPACE}" -o jsonpath='{range .items[*]}{range .spec.initContainers[*]}{.image}{"\n"}{end}{range .spec.containers[*]}{.image}{"\n"}{end}{end}' \
+        | awk -F'/' '{print $NF}' \
+        | awk -F':' '{img=$1; ver=$2?$2:"latest"; printf "%-40s %-20s\n", img, ver}' \
+        | sort -u

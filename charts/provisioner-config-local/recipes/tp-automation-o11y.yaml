@@ -11,17 +11,51 @@ meta:
     note: "tp-automation-o11y"
     GUI_PIPELINE_LOG_DEBUG: false
 
-    GUI_TP_CLUSTER_NAME: 'on-perm'
+    GUI_TP_CLUSTER_NAME: 'on-prem'
     GUI_GITHUB_TOKEN: ""
 
     # automation setup
-    GUI_TP_AUTO_CP_VERSION: "1.4"
-    GUI_TP_AUTO_IS_CONFIG_O11Y: true
+    GUI_TP_AUTO_CP_VERSION: ""    # keep it empty, unless you see an error with GUI_TP_AUTO_CP_VERSION in the logs
+    GUI_TP_AUTO_USE_LOCAL_SCRIPT: false
+    GUI_TP_AUTO_USE_GITHUB_SCRIPT: true
+    GUI_TP_AUTO_REPORT_PATH: "/tmp/auto/report"
+    GUI_TP_AUTO_REPORT_YAML_FILE: "report.yaml"
+    GUI_TP_AUTO_REPORT_TXT_FILE: "report.txt"
+    GUI_TP_AUTO_REPORT_TRACE: "true"
+    GUI_TP_AUTO_GITHUB_REPO_NAME: "github.com/TIBCOSoftware/platform-provisioner"
+    GUI_TP_AUTO_GITHUB_REPO_PATH: "docs/recipes/automation/tp-setup/bootstrap"
+    GUI_TP_AUTO_GITHUB_REPO_BRANCH: "provisioner-config-local-{{ .Chart.Version }}"
+
+    # DP capabilities deployment
+    GUI_TP_AUTO_ACTIVE_USER: true
+    GUI_TP_AUTO_ENABLE_DP: true
+    GUI_TP_AUTO_ENABLE_CONFIG_O11Y: true
+    GUI_TP_AUTO_ENABLE_FLOGO: true
+    GUI_TP_AUTO_ENABLE_BWCE: false
+    GUI_TP_AUTO_ENABLE_BW5CE: false
+    GUI_TP_AUTO_ENABLE_TIBCOHUB: false
+    GUI_TP_AUTO_ENABLE_EMS: false
+    GUI_TP_AUTO_ENABLE_PULSAR: false
+    GUI_TP_AUTO_ENABLE_BMDP: false
+    GUI_TP_AUTO_IS_ENABLE_RVDM: true
+    GUI_TP_AUTO_IS_ENABLE_EMSDM: true
+    GUI_TP_AUTO_IS_ENABLE_BW6DM: true
+    GUI_TP_AUTO_ENABLE_O11Y_WIDGET: true
+    GUI_TP_AUTO_ENABLE_E2E_TEST: false
+
+    # start app or not
+    GUI_TP_AUTO_START_FLOGO_APP: true
+    GUI_TP_AUTO_START_BWCE_APP: false
+    GUI_TP_AUTO_START_BW5CE_APP: false
 
     # CP setup
     GUI_TP_AUTO_CP_INSTANCE_ID: "cp1"
     GUI_TP_AUTO_CP_DNS_DOMAIN: "localhost.dataplanes.pro"
     GUI_TP_AUTO_CP_SERVICE_DNS_DOMAIN: ""
+    GUI_TP_AUTO_CP_DNS_DOMAIN_PREFIX_BWCE: ""
+    GUI_TP_AUTO_CP_DNS_DOMAIN_PREFIX_BW5CE: ""
+    GUI_TP_AUTO_CP_DNS_DOMAIN_PREFIX_FLOGO: ""
+    GUI_TP_AUTO_CP_DNS_DOMAIN_PREFIX_TIBCOHUB: ""
     GUI_TP_AUTO_LOGIN_URL: ""
     GUI_TP_AUTO_MAIL_URL: ""
     GUI_TP_AUTO_ADMIN_URL: ""
@@ -38,18 +72,45 @@ meta:
     GUI_TP_AUTO_K8S_DP_NAMESPACE: "k8s-auto-dp1ns"
     GUI_TP_AUTO_K8S_DP_SERVICE_ACCOUNT: "k8s-auto-dp1sa"
     GUI_TP_AUTO_INGRESS_CONTROLLER: "nginx"
+    GUI_TP_AUTO_INGRESS_CONTROLLER_CLASS_NAME: "nginx"
+    GUI_TP_INGRESS_CONTROLLER_SERVICE_NAME: "ingress-nginx-controller"
+    GUI_TP_INGRESS_CONTROLLER_SERVICE_NAMESPACE: "ingress-system"
+    GUI_TP_INGRESS_CONTROLLER_SERVICE_PORT: "443:https"
     GUI_TP_AUTO_STORAGE_CLASS: "hostpath"
+
+    # network policy
+    GUI_TP_CREATE_NETWORK_POLICIES: false
 
     # DP o11y setup
     GUI_TP_AUTO_ELASTIC_URL: ""
     GUI_TP_AUTO_ELASTIC_USER: ""
     GUI_TP_AUTO_ELASTIC_PASSWORD: ""
-    GUI_TP_AUTO_PROMETHEUS_URL: ""
+    GUI_TP_AUTO_PROMETHEUS_URL: "http://kube-prometheus-stack-prometheus.prometheus-system.svc.cluster.local:9090"
     GUI_TP_AUTO_PROMETHEUS_USER: ""
     GUI_TP_AUTO_PROMETHEUS_PASSWORD: ""
 
-    # capability setup
-    GUI_TP_AUTO_FLOGO_CAPABILITY_URL: ""
+    # fqdn setup
+    GUI_TP_AUTO_FQDN_BWCE: ""
+    GUI_TP_AUTO_FQDN_BW5CE: ""
+    GUI_TP_AUTO_FQDN_FLOGO: ""
+    GUI_TP_AUTO_FQDN_TIBCOHUB: ""
+    GUI_TP_AUTO_FQDN_BMDP: "bmdp.dummy.hostname"
+
+    # BMDP setup
+    GUI_TP_AUTO_K8S_BMDP_NAME: "k8s-auto-bmdp1"
+    GUI_TP_AUTO_K8S_BMDP_NAMESPACE: "k8s-auto-bmdp1ns"
+    GUI_TP_AUTO_K8S_BMDP_SERVICE_ACCOUNT: "k8s-auto-bmdp1sa"
+    GUI_TP_AUTO_K8S_BMDP_BW5_EMSDM: "tra5130ems"
+    GUI_TP_AUTO_K8S_BMDP_BW5_EMS_SERVER_URL: "tcp://ems.bw5dm.svc.cluster.local:7222"
+    GUI_TP_AUTO_K8S_BMDP_BW5_EMS_USERNAME: "admin"
+    GUI_TP_AUTO_K8S_BMDP_BW5_EMS_PASSWORD: ""
+
+    # TP activation server
+    GUI_TP_ACTIVATION_SERVER_CONFIG: false
+    GUI_TP_ACTIVATION_SERVER_IP: ""
+    GUI_TP_ACTIVATION_SERVER_PORT: "7070"
+    GUI_TP_ACTIVATION_SERVER_CERT_HOSTNAME: ""
+    GUI_TP_ACTIVATION_SERVER_FINGER_PRINT: ""
 
     # flow control
     GUI_TP_PORT_FORWARD: true
@@ -63,13 +124,51 @@ meta:
     TP_CLUSTER_NAME: ${GUI_TP_CLUSTER_NAME:-"on-prem"}
 
     # automation setup
-    TP_AUTO_CP_VERSION: ${GUI_TP_AUTO_CP_VERSION:-"1.3"}
-    TP_AUTO_IS_CONFIG_O11Y: ${GUI_TP_AUTO_IS_CONFIG_O11Y:-false}
+    TP_AUTO_CP_VERSION: ${GUI_TP_AUTO_CP_VERSION:-""}
+    TP_AUTO_USE_LOCAL_SCRIPT: ${GUI_TP_AUTO_USE_LOCAL_SCRIPT:-false}
+    TP_AUTO_USE_GITHUB_SCRIPT: ${GUI_TP_AUTO_USE_GITHUB_SCRIPT:-true}
+    TP_AUTO_SCRIPT_FOLDER: ${GUI_TP_AUTO_SCRIPT_FOLDER:-"/tmp/auto"}
+    TP_AUTO_SCRIPT_PY_ENV_FOLDER: ${GUI_TP_AUTO_SCRIPT_PY_ENV_FOLDER:-"/tmp/auto-py-env"}
+    TP_AUTO_REPORT_PATH: ${GUI_TP_AUTO_REPORT_PATH:-"/tmp/auto/report"}
+    TP_AUTO_REPORT_YAML_FILE: ${GUI_TP_AUTO_REPORT_YAML_FILE:-"report.yaml"}
+    TP_AUTO_REPORT_TXT_FILE: ${GUI_TP_AUTO_REPORT_TXT_FILE:-"report.txt"}
+    TP_AUTO_REPORT_TRACE: ${GUI_TP_AUTO_REPORT_TRACE:-"true"}
+    TP_AUTO_GITHUB_REPO_NAME: ${GUI_TP_AUTO_GITHUB_REPO_NAME:-"github.com/TIBCOSoftware/platform-provisioner"}
+    TP_AUTO_GITHUB_REPO_PATH: ${GUI_TP_AUTO_GITHUB_REPO_PATH:-"docs/recipes/automation/tp-setup/bootstrap"}
+    TP_AUTO_GITHUB_REPO_BRANCH: ${GUI_TP_AUTO_GITHUB_REPO_BRANCH:-"provisioner-config-local-{{ .Chart.Version }}"}
+
+    # DP capabilities deployment
+    TP_AUTO_ACTIVE_USER: ${GUI_TP_AUTO_ACTIVE_USER:-true}
+    TP_AUTO_ENABLE_DP: ${GUI_TP_AUTO_ENABLE_DP:-true}
+    TP_AUTO_IS_CREATE_DP: ${GUI_TP_AUTO_ENABLE_DP:-true} # need this as global value
+    TP_AUTO_ENABLE_CONFIG_O11Y: ${GUI_TP_AUTO_ENABLE_CONFIG_O11Y:-true}
+    TP_AUTO_IS_CONFIG_O11Y: ${GUI_TP_AUTO_ENABLE_CONFIG_O11Y:-false} # need this as global value
+    TP_AUTO_ENABLE_FLOGO: ${GUI_TP_AUTO_ENABLE_FLOGO:-true}
+    TP_AUTO_ENABLE_BWCE: ${GUI_TP_AUTO_ENABLE_BWCE:-true}
+    TP_AUTO_ENABLE_BW5CE: ${GUI_TP_AUTO_ENABLE_BW5CE:-true}
+    TP_AUTO_ENABLE_TIBCOHUB: ${GUI_TP_AUTO_ENABLE_TIBCOHUB:-true}
+    TP_AUTO_ENABLE_EMS: ${GUI_TP_AUTO_ENABLE_EMS:-true}
+    TP_AUTO_ENABLE_PULSAR: ${GUI_TP_AUTO_ENABLE_PULSAR:-true}
+    TP_AUTO_ENABLE_BMDP: ${GUI_TP_AUTO_ENABLE_BMDP:-false}
+    TP_AUTO_IS_ENABLE_RVDM: ${GUI_TP_AUTO_IS_ENABLE_RVDM:-true}
+    TP_AUTO_IS_ENABLE_EMSDM: ${GUI_TP_AUTO_IS_ENABLE_EMSDM:-true}
+    TP_AUTO_IS_ENABLE_BW6DM: ${GUI_TP_AUTO_IS_ENABLE_BW6DM:-true}
+    TP_AUTO_ENABLE_O11Y_WIDGET: ${GUI_TP_AUTO_ENABLE_O11Y_WIDGET:-true}
+    TP_AUTO_ENABLE_E2E_TEST: ${GUI_TP_AUTO_ENABLE_E2E_TEST:-true}
+
+    # start app or not
+    TP_AUTO_START_FLOGO_APP: ${GUI_TP_AUTO_START_FLOGO_APP:-true}
+    TP_AUTO_START_BWCE_APP: ${GUI_TP_AUTO_START_BWCE_APP:-false}
+    TP_AUTO_START_BW5CE_APP: ${GUI_TP_AUTO_START_BW5CE_APP:-false}
 
     # CP setup
     TP_AUTO_CP_INSTANCE_ID: ${GUI_TP_AUTO_CP_INSTANCE_ID:-"cp1"}
     TP_AUTO_CP_DNS_DOMAIN: ${GUI_TP_AUTO_CP_DNS_DOMAIN:-"localhost.dataplanes.pro"}
     TP_AUTO_CP_SERVICE_DNS_DOMAIN: ${GUI_TP_AUTO_CP_SERVICE_DNS_DOMAIN:-""} # full domain of CP
+    TP_AUTO_CP_DNS_DOMAIN_PREFIX_BWCE: ${GUI_TP_AUTO_CP_DNS_DOMAIN_PREFIX_BWCE:-"bwce"}
+    TP_AUTO_CP_DNS_DOMAIN_PREFIX_BW5CE: ${GUI_TP_AUTO_CP_DNS_DOMAIN_PREFIX_BW5CE:-"bw5ce"}
+    TP_AUTO_CP_DNS_DOMAIN_PREFIX_FLOGO: ${GUI_TP_AUTO_CP_DNS_DOMAIN_PREFIX_FLOGO:-"flogo"}
+    TP_AUTO_CP_DNS_DOMAIN_PREFIX_TIBCOHUB: ${GUI_TP_AUTO_CP_DNS_DOMAIN_PREFIX_TIBCOHUB:-"tibcohub"}
     TP_AUTO_LOGIN_URL: ${GUI_TP_AUTO_LOGIN_URL:-""}
     TP_AUTO_MAIL_URL: ${GUI_TP_AUTO_MAIL_URL:-""}
     TP_AUTO_ADMIN_URL: ${GUI_TP_AUTO_ADMIN_URL:-""}
@@ -86,7 +185,19 @@ meta:
     TP_AUTO_K8S_DP_NAMESPACE: ${GUI_TP_AUTO_K8S_DP_NAMESPACE:-"k8s-auto-dp1ns"}
     TP_AUTO_K8S_DP_SERVICE_ACCOUNT: ${GUI_TP_AUTO_K8S_DP_SERVICE_ACCOUNT:-"k8s-auto-dp1sa"}
     TP_AUTO_INGRESS_CONTROLLER: ${GUI_TP_AUTO_INGRESS_CONTROLLER:-"nginx"}
+    TP_AUTO_INGRESS_CONTROLLER_CLASS_NAME: ${GUI_TP_AUTO_INGRESS_CONTROLLER_CLASS_NAME:-"nginx"}
+    TP_INGRESS_CONTROLLER_SERVICE_NAME: ${GUI_TP_INGRESS_CONTROLLER_SERVICE_NAME:-"ingress-nginx-controller"}
+    TP_INGRESS_CONTROLLER_SERVICE_NAMESPACE: ${GUI_TP_INGRESS_CONTROLLER_SERVICE_NAMESPACE:-"ingress-system"}
+    TP_INGRESS_CONTROLLER_SERVICE_PORT: ${GUI_TP_INGRESS_CONTROLLER_SERVICE_PORT:-"443:https"}
     TP_AUTO_STORAGE_CLASS: ${GUI_TP_AUTO_STORAGE_CLASS:-"hostpath"}
+
+    # network policies
+    TP_CREATE_NETWORK_POLICIES: ${GUI_TP_CREATE_NETWORK_POLICIES:-false}
+
+    # node
+    TP_CLUSTER_NODE_CIDR: ${GUI_TP_CLUSTER_NODE_CIDR:-"10.180.0.0/16"}
+    TP_CLUSTER_POD_CIDR: ${GUI_TP_CLUSTER_POD_CIDR:-"10.180.0.0/16"} # for k3s: 10.42.0.0/16 for kind 10.244.0.0/16
+    TP_CLUSTER_SERVICE_CIDR: ${GUI_TP_CLUSTER_SERVICE_CIDR:-"10.96.0.0/12"} # for k3s: 10.43.0.0/16 for kind 10.96.0.0/16
 
     # DP o11y setup
     TP_AUTO_ELASTIC_URL: ${GUI_TP_AUTO_ELASTIC_URL:-""}
@@ -96,16 +207,45 @@ meta:
     TP_AUTO_PROMETHEUS_USER: ${GUI_TP_AUTO_PROMETHEUS_USER:-""}
     TP_AUTO_PROMETHEUS_PASSWORD: ${GUI_TP_AUTO_PROMETHEUS_PASSWORD:-""}
 
-    # capability setup
-    TP_AUTO_FLOGO_CAPABILITY_URL: ${GUI_TP_AUTO_FLOGO_CAPABILITY_URL:-""}
+    # fqdn setup
+    TP_AUTO_FQDN_BWCE: ${GUI_TP_AUTO_FQDN_BWCE:-""}
+    TP_AUTO_FQDN_BW5CE: ${GUI_TP_AUTO_FQDN_BW5CE:-""}
+    TP_AUTO_FQDN_FLOGO: ${GUI_TP_AUTO_FQDN_FLOGO:-""}
+    TP_AUTO_FQDN_TIBCOHUB: ${GUI_TP_AUTO_FQDN_TIBCOHUB:-""}
+    TP_AUTO_FQDN_BMDP: ${GUI_TP_AUTO_FQDN_BMDP:-""}
+
+    # BMDP setup
+    TP_AUTO_K8S_BMDP_NAME: ${GUI_TP_AUTO_K8S_BMDP_NAME:-"k8s-auto-bmdp1"}
+    TP_AUTO_K8S_BMDP_NAMESPACE: ${GUI_TP_AUTO_K8S_BMDP_NAMESPACE:-"k8s-auto-bmdp1ns"}
+    TP_AUTO_K8S_BMDP_SERVICE_ACCOUNT: ${GUI_TP_AUTO_K8S_BMDP_SERVICE_ACCOUNT:-"k8s-auto-bmdp1sa"}
+    TP_AUTO_K8S_BMDP_BW5_EMSDM: ${GUI_TP_AUTO_K8S_BMDP_BW5_EMSDM:-"tra5130ems"}
+    TP_AUTO_K8S_BMDP_BW5_EMS_SERVER_URL: ${GUI_TP_AUTO_K8S_BMDP_BW5_EMS_SERVER_URL:-"tcp://ems.bw5dm.svc.cluster.local:7222"}
+    TP_AUTO_K8S_BMDP_BW5_EMS_USERNAME: ${GUI_TP_AUTO_K8S_BMDP_BW5_EMS_USERNAME:-"admin"}
+    TP_AUTO_K8S_BMDP_BW5_EMS_PASSWORD: ${GUI_TP_AUTO_K8S_BMDP_BW5_EMS_PASSWORD:-""}
+    TP_AUTO_K8S_BMDP_BW6DM: ${GUI_TP_AUTO_K8S_BMDP_BW6DM:-"bw6110"}
+    TP_AUTO_K8S_BMDP_BW6DM_URL: ${GUI_TP_AUTO_K8S_BMDP_BW6DM_URL:-"http://bw6dm.bw5dm.svc:9091/bwta"}
+
+    # TP activation server
+    TP_ACTIVATION_SERVER_CONFIG: ${GUI_TP_ACTIVATION_SERVER_CONFIG:-true}
+    TP_ACTIVATION_SERVER_IP: ${GUI_TP_ACTIVATION_SERVER_IP:-""}
+    TP_ACTIVATION_SERVER_PORT: ${GUI_TP_ACTIVATION_SERVER_PORT:-"7070"}
+    TP_ACTIVATION_SERVER_CERT_HOSTNAME: ${GUI_TP_ACTIVATION_SERVER_CERT_HOSTNAME:-""}
+    TP_ACTIVATION_SERVER_FINGER_PRINT: ${GUI_TP_ACTIVATION_SERVER_FINGER_PRINT:-""}
 
     # flow control
-    PYTHON_FILE_INPUT_NAME: py-scripts.yaml
-    PYTHON_FILE_ENTRY_POINT: run.py
-    TP_PORT_FORWARD: ${GUI_TP_PORT_FORWARD:-true}
+    PYTHON_FILE_LOGIN_POINT: page_auth.py
+    PYTHON_FILE_ENTRY_POINT: page_dp.py
+    PYTHON_FILE_ENTRY_POINT_BMDP: page_bmdp.py
+    PYTHON_FILE_ENTRY_POINT_O11Y: page_o11y.py
+    PYTHON_FILE_ENV_POINT: page_env.py
     TP_OVERWRITE_DNS: ${GUI_TP_OVERWRITE_DNS:-false}
+    TP_PORT_FORWARD: ${GUI_TP_PORT_FORWARD:-true}
+
+    # e2e test cases
+    PYTHON_E2E_TEST_CASES: "e2e/**/*.py"
 tasks:
 - condition: ${TP_OVERWRITE_DNS} # this is used for overwrite DNS
+  name: overwrite-dns
   clusters:
     - name: ${TP_CLUSTER_NAME}
   script:
@@ -114,6 +254,7 @@ tasks:
     content: |
       echo "nameserver 10.178.2.10" > /etc/resolv.conf
 - condition: ${TP_PORT_FORWARD} # this is used for run pipeline locally
+  name: port-forward
   clusters:
     - name: ${TP_CLUSTER_NAME}
   script:
@@ -121,30 +262,591 @@ tasks:
     fileName: script.sh
     content: |
       cd /tmp
-      nohup kubectl port-forward -n ingress-system --address 0.0.0.0 service/ingress-nginx-controller 80:http 443:https &
-- condition: true
+      # need to output underneath errors to stdout
+      kubectl get svc -n "${TP_INGRESS_CONTROLLER_SERVICE_NAMESPACE}" "${TP_INGRESS_CONTROLLER_SERVICE_NAME}" > /dev/null
+      if [ $? -ne 0 ]; then
+        echo "Service ${TP_INGRESS_CONTROLLER_SERVICE_NAME} not found in namespace ${TP_INGRESS_CONTROLLER_SERVICE_NAMESPACE}"
+        exit 1
+      else
+        echo "Service ${TP_INGRESS_CONTROLLER_SERVICE_NAME} found in namespace ${TP_INGRESS_CONTROLLER_SERVICE_NAMESPACE}"
+      fi
+      echo "starting port-forward..."
+      nohup setsid bash -c 'while true; do
+        kubectl port-forward -n "${TP_INGRESS_CONTROLLER_SERVICE_NAMESPACE}" --address 0.0.0.0 service/"${TP_INGRESS_CONTROLLER_SERVICE_NAME}" "${TP_INGRESS_CONTROLLER_SERVICE_PORT}"
+        echo "kubectl port-forward crashed, restarting..."
+        sleep 5
+      done' &
+- condition: ${TP_AUTO_USE_GITHUB_SCRIPT}
+  name: clone-github-script
+  clusters:
+    - name: ${TP_CLUSTER_NAME}
+  repo:
+    git:
+      github:
+        repo: ${TP_AUTO_GITHUB_REPO_NAME}
+        path: ${TP_AUTO_GITHUB_REPO_PATH}
+        branch: ${TP_AUTO_GITHUB_REPO_BRANCH}
+  script:
+    ignoreErrors: false
+    fileName: script.sh
+    content: |
+      mkdir -p ${TP_AUTO_SCRIPT_FOLDER}
+      cp -R * ${TP_AUTO_SCRIPT_FOLDER}
+      if command -v uv >/dev/null 2>&1; then
+        echo "[INFO] uv detected, using uv sync..."
+        export UV_PROJECT_ENVIRONMENT="${TP_AUTO_SCRIPT_PY_ENV_FOLDER}"
+        uv venv "${UV_PROJECT_ENVIRONMENT}" --python python3.13
+        uv sync --frozen || uv sync
+      else
+        echo "[INFO] uv not found, falling back to python venv..."
+        python3 -m venv "${TP_AUTO_SCRIPT_PY_ENV_FOLDER}"
+        source "${TP_AUTO_SCRIPT_PY_ENV_FOLDER}/bin/activate"
+      
+        if [ -f requirements.txt ]; then
+          echo "[INFO] Installing from requirements.txt..."
+          pip install -r requirements.txt
+        elif [ -f pyproject.toml ]; then
+          echo "[INFO] Installing in editable mode from pyproject.toml..."
+          pip install -e .
+        else
+          echo "[WARN] No requirements.txt or pyproject.toml found, skipping pip install"
+        fi
+      fi
+- condition: ${TP_AUTO_USE_LOCAL_SCRIPT}
+  name: setup-local-script
   clusters:
     - name: ${TP_CLUSTER_NAME}
   script:
     ignoreErrors: false
     fileName: script.sh
     content: |
-      input_yaml="${PYTHON_FILE_INPUT_NAME}"
+      cd ${TP_AUTO_SCRIPT_FOLDER}
+      if command -v uv >/dev/null 2>&1; then
+        echo "[INFO] uv detected, using uv sync..."
+        export UV_PROJECT_ENVIRONMENT="${TP_AUTO_SCRIPT_PY_ENV_FOLDER}"
+        uv venv "${UV_PROJECT_ENVIRONMENT}" --python python3.13
+        uv sync --frozen || uv sync
+      else
+        echo "[INFO] uv not found, falling back to python venv..."
+        python3 -m venv "${TP_AUTO_SCRIPT_PY_ENV_FOLDER}"
+        source "${TP_AUTO_SCRIPT_PY_ENV_FOLDER}/bin/activate"
       
-      yq eval 'to_entries | .[] | .key + " " + (.value)' "$input_yaml" | while read -r file_name decoded_content; do
-        if [[ -n $file_name ]]; then
-          echo "$decoded_content" | base64 -d > "$file_name"
-          echo "Created file: $file_name"
+        if [ -f requirements.txt ]; then
+          echo "[INFO] Installing from requirements.txt..."
+          pip install -r requirements.txt
+        elif [ -f pyproject.toml ]; then
+          echo "[INFO] Installing in editable mode from pyproject.toml..."
+          pip install -e .
+        else
+          echo "[WARN] No requirements.txt or pyproject.toml found, skipping pip install"
         fi
-      done
-      pip install -r requirements.txt
-      python ${PYTHON_FILE_ENTRY_POINT}
-  payload:
-    base64Encoded: false
-    fileName: ${PYTHON_FILE_INPUT_NAME}
+      fi
+- condition: ${TP_ACTIVATION_SERVER_CONFIG}
+  name: "activation-server-dns-config"
+  script:
     content: |
-      {{- $root := . }}
-      {{- range $path, $bytes := .Files.Glob "scripts/automation/*" }}
-      {{ base $path }}: |
-      {{ $root.Files.Get $path | b64enc | indent 2 -}}
-      {{- end }}
+      add_static_dns_record_to_coredns() {
+        local namespace="kube-system"
+        local configmap_name="coredns"
+        local new_record="${TP_ACTIVATION_SERVER_IP} ${TP_ACTIVATION_SERVER_CERT_HOSTNAME}"
+      
+        echo "🔍 Reading current NodeHosts from ConfigMap '$configmap_name' in namespace '$namespace'..."
+        local current_hosts
+        current_hosts=$(kubectl get configmap "$configmap_name" -n "$namespace" -o jsonpath='{.data.NodeHosts}')
+      
+        if echo "$current_hosts" | grep -Fxq "$new_record"; then
+          echo "✅ Record already exists: $new_record"
+          return 0
+        fi
+      
+        echo "➕ Appending new record: $new_record"
+        local updated_hosts="${current_hosts}"$'\n'"${new_record}"
+      
+        echo "📦 Patching ConfigMap..."
+        kubectl patch configmap "$configmap_name" -n "$namespace" --type merge \
+          --patch "$(cat <<EOF
+      data:
+        NodeHosts: |
+      $(echo "$updated_hosts" | sed 's/^/    /')
+      EOF
+      )"
+      
+        echo "✅ Record added successfully."
+      
+        echo "🔄 Restarting CoreDNS to apply changes..."
+        kubectl -n "$namespace" rollout restart deployment coredns
+      
+        echo "🎉 Done."
+      }
+      
+      add_static_dns_record_to_coredns
+- condition: ${TP_AUTO_ACTIVE_USER} # only create admin and subscription
+  name: active-user
+  clusters:
+    - name: ${TP_CLUSTER_NAME}
+  script:
+    ignoreErrors: false
+    fileName: script.sh
+    content: |
+      source "${TP_AUTO_SCRIPT_PY_ENV_FOLDER}/bin/activate"
+      cd ${TP_AUTO_SCRIPT_FOLDER}
+      _report_file="${TP_AUTO_REPORT_PATH}/${TP_AUTO_REPORT_YAML_FILE}"
+
+      if [[ -f "$_report_file" ]]; then
+        if [[ "$(yq '.ENV.REPORT_AUTO_ACTIVE_USER' "$_report_file")" == "true" ]]; then
+          echo "----------------------------------------------------------------"
+          echo "ENV.REPORT_AUTO_ACTIVE_USER is true. User has been active. Exiting..."
+          echo "----------------------------------------------------------------"
+          exit 0
+        else
+          echo "_report_file: ${_report_file}"
+          cat "$_report_file"
+        fi
+      fi
+
+      echo "===== Task Name: active-user, Running file ${PYTHON_FILE_LOGIN_POINT} ====="
+      if command -v uv >/dev/null 2>&1; then
+        uv run --active ${PYTHON_FILE_LOGIN_POINT}
+      else
+        python ${PYTHON_FILE_LOGIN_POINT}
+      fi
+      _result=$?
+      echo "python return code: ${_result}"
+      exit ${_result}
+- condition: ${TP_AUTO_ENABLE_DP} # only create DP
+  name: create-dp
+  clusters:
+    - name: ${TP_CLUSTER_NAME}
+  script:
+    ignoreErrors: false
+    fileName: script.sh
+    content: |
+      source "${TP_AUTO_SCRIPT_PY_ENV_FOLDER}/bin/activate"
+      export TP_AUTO_IS_CREATE_DP=${TP_AUTO_ENABLE_DP}
+      cd ${TP_AUTO_SCRIPT_FOLDER}
+      _report_file="${TP_AUTO_REPORT_PATH}/${TP_AUTO_REPORT_YAML_FILE}"
+      if [[ -f "$_report_file" ]]; then
+        dp_name=$(yq '.dataPlane[] | select(.name == env(TP_AUTO_K8S_DP_NAME)) | .name' "$_report_file")
+        if [[ -n "$dp_name" ]]; then
+          echo "----------------------------------------------------------------"
+          echo "dataPlane[$dp_name] already exists. Exiting..."
+          echo "----------------------------------------------------------------"
+          exit 0
+        else
+          echo "_report_file: ${_report_file}"
+          cat "$_report_file"
+        fi
+      fi
+
+      echo "===== Task Name: create-dp, Running file ${PYTHON_FILE_ENTRY_POINT} ====="
+      if command -v uv >/dev/null 2>&1; then
+        uv run --active ${PYTHON_FILE_ENTRY_POINT}
+      else
+        python ${PYTHON_FILE_ENTRY_POINT}
+      fi
+      _result=$?
+      echo "python return code: ${_result}"
+      exit ${_result}
+- condition: ${TP_ACTIVATION_SERVER_CONFIG}
+  name: "activation-server-config"
+  script:
+    content: |
+      # this is a long running activation server.
+      if kubectl get ns "${TP_AUTO_K8S_DP_NAMESPACE}" >/dev/null 2>&1 && [ -n "${TP_ACTIVATION_SERVER_IP}" ]; then
+        kubectl apply -n ${TP_AUTO_K8S_DP_NAMESPACE} -f - <<EOF
+      kind: Service
+      apiVersion: v1
+      metadata:
+        name: tib-activate
+      spec:
+        clusterIP: None
+
+      ---
+      kind: Endpoints
+      apiVersion: v1
+      metadata:
+        name: tib-activate
+      subsets:
+        - addresses:
+            - ip: "${TP_ACTIVATION_SERVER_IP}"
+          ports:
+            - port: 7070
+      EOF
+      fi
+- condition: ${TP_AUTO_ENABLE_FLOGO} # only deploy flogo
+  name: deploy-flogo
+  clusters:
+    - name: ${TP_CLUSTER_NAME}
+  script:
+    ignoreErrors: false
+    fileName: script.sh
+    content: |
+      source "${TP_AUTO_SCRIPT_PY_ENV_FOLDER}/bin/activate"
+      export TP_AUTO_IS_PROVISION_FLOGO=${TP_AUTO_ENABLE_FLOGO}
+      cd ${TP_AUTO_SCRIPT_FOLDER}
+      
+      export dp_name=${TP_AUTO_K8S_DP_NAME}
+      export capability="flogo"
+      export app_name="flogo-auto-1"
+      _report_file="${TP_AUTO_REPORT_PATH}/${TP_AUTO_REPORT_YAML_FILE}"
+      if [[ -f "$_report_file" ]]; then
+        app_status="$(
+          yq e -r '[.dataPlane[] | select(.name == env(dp_name)) |
+                   .capability[] | select(.name == env(capability)) |
+                   .app[]        | select(.name == env(app_name)) |
+                   .status
+                   ][0] // ""
+                   ' "$_report_file"
+            )"
+        if [[ -n "$app_status" ]]; then
+          echo "----------------------------------------------------------------"
+          echo "dataPlane[${dp_name}] -> ${capability} -> ${app_name}.status: '${app_status}' already exists. Exiting..."
+          echo "----------------------------------------------------------------"
+          exit 0
+        else
+          echo "_report_file: ${_report_file}"
+          cat "$_report_file"
+        fi
+      fi
+      
+      echo "===== Task Name: deploy-flogo, Running file ${PYTHON_FILE_ENTRY_POINT} ====="
+      if command -v uv >/dev/null 2>&1; then
+        uv run --active ${PYTHON_FILE_ENTRY_POINT}
+      else
+        python ${PYTHON_FILE_ENTRY_POINT}
+      fi
+      _result=$?
+      echo "python return code: ${_result}"
+      exit ${_result}
+- condition: ${TP_AUTO_ENABLE_BWCE} # only deploy bwce
+  name: deploy-bwce
+  clusters:
+    - name: ${TP_CLUSTER_NAME}
+  script:
+    ignoreErrors: false
+    fileName: script.sh
+    content: |
+      source "${TP_AUTO_SCRIPT_PY_ENV_FOLDER}/bin/activate"
+      export TP_AUTO_IS_PROVISION_BWCE=${TP_AUTO_ENABLE_BWCE}
+      cd ${TP_AUTO_SCRIPT_FOLDER}
+      
+      export dp_name=${TP_AUTO_K8S_DP_NAME}
+      export capability="bwce"
+      export app_name="bwce-tt"
+      _report_file="${TP_AUTO_REPORT_PATH}/${TP_AUTO_REPORT_YAML_FILE}"
+      if [[ -f "$_report_file" ]]; then
+        app_status="$(
+          yq e -r '[.dataPlane[] | select(.name == env(dp_name)) |
+                   .capability[] | select(.name == env(capability)) |
+                   .app[]        | select(.name == env(app_name)) |
+                   .status
+                   ][0] // ""
+                   ' "$_report_file"
+            )"
+        if [[ -n "$app_status" ]]; then
+          echo "----------------------------------------------------------------"
+          echo "dataPlane[${dp_name}] -> ${capability} -> ${app_name}.status: '${app_status}' already exists. Exiting..."
+          echo "----------------------------------------------------------------"
+          exit 0
+        else
+          echo "_report_file: ${_report_file}"
+          cat "$_report_file"
+        fi
+      fi
+      
+      echo "===== Task Name: deploy-bwce, Running file ${PYTHON_FILE_ENTRY_POINT} ====="
+      if command -v uv >/dev/null 2>&1; then
+        uv run --active ${PYTHON_FILE_ENTRY_POINT}
+      else
+        python ${PYTHON_FILE_ENTRY_POINT}
+      fi
+      _result=$?
+      echo "python return code: ${_result}"
+      exit ${_result}
+- condition: ${TP_AUTO_ENABLE_BW5CE} # only deploy bw5ce
+  name: deploy-bw5ce
+  clusters:
+    - name: ${TP_CLUSTER_NAME}
+  script:
+    ignoreErrors: false
+    fileName: script.sh
+    content: |
+      source "${TP_AUTO_SCRIPT_PY_ENV_FOLDER}/bin/activate"
+      export TP_AUTO_IS_PROVISION_BW5CE=${TP_AUTO_ENABLE_BW5CE}
+      cd ${TP_AUTO_SCRIPT_FOLDER}
+      
+      export dp_name=${TP_AUTO_K8S_DP_NAME}
+      export capability="bw5ce"
+      export app_name="bw5ce-dynamicHeaders"
+      _report_file="${TP_AUTO_REPORT_PATH}/${TP_AUTO_REPORT_YAML_FILE}"
+      if [[ -f "$_report_file" ]]; then
+        app_status="$(
+          yq e -r '[.dataPlane[] | select(.name == env(dp_name)) |
+                   .capability[] | select(.name == env(capability)) |
+                   .app[]        | select(.name == env(app_name)) |
+                   .status
+                   ][0] // ""
+                   ' "$_report_file"
+            )"
+        if [[ -n "$app_status" ]]; then
+          echo "----------------------------------------------------------------"
+          echo "dataPlane[${dp_name}] -> ${capability} -> ${app_name}.status: '${app_status}' already exists. Exiting..."
+          echo "----------------------------------------------------------------"
+          exit 0
+        else
+          echo "_report_file: ${_report_file}"
+          cat "$_report_file"
+        fi
+      fi
+      
+      echo "===== Task Name: deploy-bw5ce, Running file ${PYTHON_FILE_ENTRY_POINT} ====="
+      if command -v uv >/dev/null 2>&1; then
+        uv run --active ${PYTHON_FILE_ENTRY_POINT}
+      else
+        python ${PYTHON_FILE_ENTRY_POINT}
+      fi
+      _result=$?
+      echo "python return code: ${_result}"
+      exit ${_result}
+- condition: ${TP_AUTO_ENABLE_TIBCOHUB} # only deploy tibcohub
+  name: deploy-tibcohub
+  clusters:
+    - name: ${TP_CLUSTER_NAME}
+  script:
+    ignoreErrors: false
+    fileName: script.sh
+    content: |
+      source "${TP_AUTO_SCRIPT_PY_ENV_FOLDER}/bin/activate"
+      export TP_AUTO_IS_PROVISION_TIBCOHUB=${TP_AUTO_ENABLE_TIBCOHUB}
+      cd ${TP_AUTO_SCRIPT_FOLDER}
+      
+      export dp_name=${TP_AUTO_K8S_DP_NAME}
+      export capability="tibcohub"
+      _report_file="${TP_AUTO_REPORT_PATH}/${TP_AUTO_REPORT_YAML_FILE}"
+      if [[ -f "$_report_file" ]]; then
+        capability_status="$(
+          yq e -r '[.dataPlane[] | select(.name == env(dp_name)) |
+                   .capability[].name
+                   ][0] // ""
+                   ' "$_report_file"
+            )"
+        if [[ -n "$capability_status" ]]; then
+          echo "----------------------------------------------------------------"
+          echo "dataPlane[${dp_name}] -> ${capability} already exists. Exiting..."
+          echo "----------------------------------------------------------------"
+          exit 0
+        else
+          echo "_report_file: ${_report_file}"
+          cat "$_report_file"
+        fi
+      fi
+      
+      echo "===== Task Name: deploy-tibcohub, Running file ${PYTHON_FILE_ENTRY_POINT} ====="
+      if command -v uv >/dev/null 2>&1; then
+        uv run --active ${PYTHON_FILE_ENTRY_POINT}
+      else
+        python ${PYTHON_FILE_ENTRY_POINT}
+      fi
+      _result=$?
+      echo "python return code: ${_result}"
+      exit ${_result}
+- condition: ${TP_AUTO_ENABLE_EMS} # only deploy EMS
+  name: deploy-ems
+  clusters:
+    - name: ${TP_CLUSTER_NAME}
+  script:
+    ignoreErrors: false
+    fileName: script.sh
+    content: |
+      source "${TP_AUTO_SCRIPT_PY_ENV_FOLDER}/bin/activate"
+      export TP_AUTO_IS_PROVISION_EMS=${TP_AUTO_ENABLE_EMS}
+      cd ${TP_AUTO_SCRIPT_FOLDER}
+      
+      export dp_name=${TP_AUTO_K8S_DP_NAME}
+      export capability="ems"
+      _report_file="${TP_AUTO_REPORT_PATH}/${TP_AUTO_REPORT_YAML_FILE}"
+      if [[ -f "$_report_file" ]]; then
+        capability_status="$(
+          yq e -r '[.dataPlane[] | select(.name == env(dp_name)) |
+                   .capability[].name
+                   ][0] // ""
+                   ' "$_report_file"
+            )"
+        if [[ -n "$capability_status" ]]; then
+          echo "----------------------------------------------------------------"
+          echo "dataPlane[${dp_name}] -> ${capability} already exists. Exiting..."
+          echo "----------------------------------------------------------------"
+          exit 0
+        else
+          echo "_report_file: ${_report_file}"
+          cat "$_report_file"
+        fi
+      fi
+      
+      echo "===== Task Name: deploy-ems, Running file ${PYTHON_FILE_ENTRY_POINT} ====="
+      if command -v uv >/dev/null 2>&1; then
+        uv run --active ${PYTHON_FILE_ENTRY_POINT}
+      else
+        python ${PYTHON_FILE_ENTRY_POINT}
+      fi
+      _result=$?
+      echo "python return code: ${_result}"
+      exit ${_result}
+- condition: ${TP_AUTO_ENABLE_PULSAR} # only deploy pulsar
+  name: deploy-pulsar
+  clusters:
+    - name: ${TP_CLUSTER_NAME}
+  script:
+    ignoreErrors: false
+    fileName: script.sh
+    content: |
+      source "${TP_AUTO_SCRIPT_PY_ENV_FOLDER}/bin/activate"
+      export TP_AUTO_IS_PROVISION_PULSAR=${TP_AUTO_ENABLE_PULSAR}
+      cd ${TP_AUTO_SCRIPT_FOLDER}
+      
+      echo "===== Task Name: deploy-pulsar, Running file ${PYTHON_FILE_ENTRY_POINT} ====="
+      if command -v uv >/dev/null 2>&1; then
+        uv run --active ${PYTHON_FILE_ENTRY_POINT}
+      else
+        python ${PYTHON_FILE_ENTRY_POINT}
+      fi
+      _result=$?
+      echo "python return code: ${_result}"
+      exit ${_result}
+- condition: ${TP_AUTO_ENABLE_BMDP} # only create BMDP
+  name: create-bmdp
+  clusters:
+    - name: ${TP_CLUSTER_NAME}
+  script:
+    ignoreErrors: false
+    fileName: script.sh
+    content: |
+      source "${TP_AUTO_SCRIPT_PY_ENV_FOLDER}/bin/activate"
+      export TP_AUTO_IS_CREATE_BMDP=${TP_AUTO_ENABLE_BMDP}
+      cd ${TP_AUTO_SCRIPT_FOLDER}
+      _report_file="${TP_AUTO_REPORT_PATH}/${TP_AUTO_REPORT_YAML_FILE}"
+      if [[ -f "$_report_file" ]]; then
+        dp_name=$(yq '.dataPlane[] | select(.name == env(TP_AUTO_K8S_BMDP_NAME)) | .name' "$_report_file")
+        if [[ -n "$dp_name" ]]; then
+          echo "----------------------------------------------------------------"
+          echo "dataPlane[$dp_name] already exists. Exiting..."
+          echo "----------------------------------------------------------------"
+          exit 0
+        else
+          echo "_report_file: ${_report_file}"
+          cat "$_report_file"
+        fi
+      fi
+
+      echo "===== Task Name: create-bmdp, Running file ${PYTHON_FILE_ENTRY_POINT_BMDP} ====="
+      if command -v uv >/dev/null 2>&1; then
+        uv run --active ${PYTHON_FILE_ENTRY_POINT_BMDP}
+      else
+        python ${PYTHON_FILE_ENTRY_POINT_BMDP}
+      fi
+      _result=$?
+      echo "python return code: ${_result}"
+      exit ${_result}
+- condition: ${TP_ACTIVATION_SERVER_CONFIG}
+  name: "activation-server-config"
+  script:
+    content: |
+      # this is a long running activation server.
+      if kubectl get ns "${TP_AUTO_K8S_BMDP_NAMESPACE}" >/dev/null 2>&1 && [ -n "${ACTIVATION_SERVER_IP}" ]; then
+        kubectl apply -n ${TP_AUTO_K8S_BMDP_NAMESPACE} -f - <<EOF
+      kind: Service
+      apiVersion: v1
+      metadata:
+        name: tib-activate
+      spec:
+        clusterIP: None
+
+      ---
+      kind: Endpoints
+      apiVersion: v1
+      metadata:
+        name: tib-activate
+      subsets:
+        - addresses:
+            - ip: "${ACTIVATION_SERVER_IP}"
+          ports:
+            - port: 7070
+      EOF
+      fi
+- condition: ${TP_AUTO_ENABLE_O11Y_WIDGET} # only initialize Observability widget
+  name: add-card-to-o11y
+  clusters:
+    - name: ${TP_CLUSTER_NAME}
+  script:
+    ignoreErrors: false
+    fileName: script.sh
+    content: |
+      source "${TP_AUTO_SCRIPT_PY_ENV_FOLDER}/bin/activate"
+      cd ${TP_AUTO_SCRIPT_FOLDER}
+      
+      _report_file="${TP_AUTO_REPORT_PATH}/${TP_AUTO_REPORT_YAML_FILE}"
+      if [[ -f "$_report_file" ]]; then
+        k8s_o11y_widget_status="$(
+              yq e -r '[.dataPlane[] | select(.name == env(TP_AUTO_K8S_DP_NAME)).o11yWidget] // ""' "$_report_file"
+            )"
+        bmdp_o11y_widget_status="$(
+              yq e -r '[.dataPlane[] | select(.name == env(TP_AUTO_K8S_BMDP_NAME)).o11yWidget] // ""' "$_report_file"
+            )"
+        if [[ -n "$k8s_o11y_widget_status" || -n "$bmdp_o11y_widget_status" ]]; then
+          echo "----------------------------------------------------------------"
+          echo "dataPlane -> o11y widget already exists. Exiting..."
+          echo "----------------------------------------------------------------"
+          exit 0
+        else
+          echo "_report_file: ${_report_file}"
+          cat "$_report_file"
+        fi
+      fi
+      
+      echo "===== Task Name: add-card-to-o11y, Running file ${PYTHON_FILE_ENTRY_POINT_O11Y} ====="
+      if command -v uv >/dev/null 2>&1; then
+        uv run --active ${PYTHON_FILE_ENTRY_POINT_O11Y}
+      else
+        python ${PYTHON_FILE_ENTRY_POINT_O11Y}
+      fi
+      _result=$?
+      echo "python return code: ${_result}"
+      exit 0
+- condition: true
+  name: print-report
+  clusters:
+    - name: ${TP_CLUSTER_NAME}
+  script:
+    ignoreErrors: false
+    fileName: script.sh
+    content: |
+      source "${TP_AUTO_SCRIPT_PY_ENV_FOLDER}/bin/activate"
+      cd ${TP_AUTO_SCRIPT_FOLDER}
+      
+      echo "===== Task Name: print-report, Running file ${PYTHON_FILE_ENV_POINT} ====="
+      if command -v uv >/dev/null 2>&1; then
+        uv run --active ${PYTHON_FILE_ENV_POINT}
+      else
+        python ${PYTHON_FILE_ENV_POINT}
+      fi
+      _result=$?
+      echo "python return code: ${_result}"
+      exit ${_result}
+# Keep this task at the end of the pipeline, after run e2e test, the re-try process will exit
+# e2e test case has been disabled by default, to enable it need to set meta.guiEnv.GUI_TP_AUTO_ENABLE_E2E_TEST=true
+- condition: ${TP_AUTO_ENABLE_E2E_TEST} # only run e2e test
+  name: run-e2e-test
+  clusters:
+    - name: ${TP_CLUSTER_NAME}
+  script:
+    ignoreErrors: false
+    fileName: script.sh
+    content: |
+      source "${TP_AUTO_SCRIPT_PY_ENV_FOLDER}/bin/activate"
+      cd ${TP_AUTO_SCRIPT_FOLDER}
+      
+      echo "===== Task Name: run-e2e-test, Running file ${PYTHON_E2E_TEST_CASES} ====="
+      pytest -n auto -v --tb=long --dist=loadfile --html=report/report.html --self-contained-html ${PYTHON_E2E_TEST_CASES}
+      _result=$?
+      echo "python return code: ${_result}"
+      exit 0

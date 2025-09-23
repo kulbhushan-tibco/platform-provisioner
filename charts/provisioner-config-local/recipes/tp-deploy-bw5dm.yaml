@@ -1,0 +1,212 @@
+apiVersion: v1
+kind: helm-install
+meta:
+  guiEnv:
+    note: "deploy-bw5dm"
+
+    # github
+    GUI_BW5_CHART_REPO: "https://raw.githubusercontent.com/tibco/cicinfra-integration/gh-pages/"
+    GUI_BW5_CHART_REPO_USER_NAME: "bw-dev"
+    GUI_BW5_CHART_REPO_TOKEN: ""
+
+    # env
+    GUI_TP_CLUSTER_NAME: "on-prem"
+    GUI_TP_ACTIVATION_SERVER_IP: ""
+    GUI_TP_ACTIVATION_SERVER_PORT: "7070"
+    GUI_TP_ACTIVATION_SERVER_CERT_HOSTNAME: ""
+    GUI_TP_ACTIVATION_SERVER_FINGER_PRINT: ""
+
+    # BW5DM
+    GUI_BW5_CHART_VERSION: "^1.1.0"
+    GUI_TP_BWDM_NAMESPACE: "bw5dm"
+    GUI_TP_BWDM_RELEASE_NAME: "bw5dm"
+    GUI_TP_OTEL_TRACES_ENDPOINT: "http://otel-userapp-traces.k8s-auto-bmdp1ns.svc:4318/v1/traces"
+    GUI_TP_OTEL_METRICS_ENDPOINT: "http://otel-userapp-metrics.k8s-auto-bmdp1ns.svc:4318/v1/metrics"
+    GUI_TP_OTEL_LOGS_ENDPOINT: "http://otel-userapp-logs.k8s-auto-bmdp1ns.svc:4318/v1/logs"
+
+    # image tag
+    GUI_TP_BMDP_IMAGE_TAG_BW5EMSDM: ""
+    GUI_TP_BMDP_IMAGE_TAG_BW5RVDM: ""
+    GUI_TP_BMDP_IMAGE_TAG_HAWKCONSOLE: ""
+    GUI_TP_BMDP_IMAGE_TAG_BW6DM: ""
+    GUI_TP_BMDP_IMAGE_TAG_EMS: ""
+
+    # flow control
+    GUI_TP_DEPLOY_RVDM: true
+    GUI_TP_DEPLOY_EMS_SERVER: true
+    GUI_TP_DEPLOY_EMSDM: true
+    GUI_TP_DEPLOY_HAWKCONSOLE: true
+    GUI_TP_DEPLOY_BW6DM: true
+    GUI_PIPELINE_LOG_DEBUG: false
+  globalEnvVariable:
+    REPLACE_RECIPE: true
+    PIPELINE_LOG_DEBUG: ${GUI_PIPELINE_LOG_DEBUG:-false}
+    PIPELINE_CHECK_DOCKER_STATUS: false
+
+    # github
+    TP_CHART_REPO: ${GUI_BW5_CHART_REPO:-https://raw.githubusercontent.com/tibco/cicinfra-integration/gh-pages/}
+    TP_CHART_REPO_USER_NAME: ${GUI_BW5_CHART_REPO_USER_NAME}
+    TP_CHART_REPO_TOKEN: ${GUI_BW5_CHART_REPO_TOKEN}
+
+    TP_CLUSTER_NAME: ${GUI_TP_CLUSTER_NAME:-"on-prem"}
+
+    # BW5DM
+    BW5_CHART_VERSION: ${GUI_BW5_CHART_VERSION:-"^1.1.0"}
+    TP_BWDM_NAMESPACE: ${GUI_TP_BWDM_NAMESPACE:-bw5dm}
+    TP_BWDM_RELEASE_NAME: ${GUI_TP_BWDM_RELEASE_NAME:-bw5dm}
+    TP_OTEL_TRACES_ENDPOINT: ${GUI_TP_OTEL_TRACES_ENDPOINT:-"http://otel-userapp-traces.k8s-auto-bmdp1ns.svc:4318/v1/traces"}
+    TP_OTEL_METRICS_ENDPOINT: ${GUI_TP_OTEL_METRICS_ENDPOINT:-"http://otel-userapp-metrics.k8s-auto-bmdp1ns.svc:4318/v1/metrics"}
+    TP_OTEL_LOGS_ENDPOINT: ${GUI_TP_OTEL_LOGS_ENDPOINT:-"http://otel-userapp-logs.k8s-auto-bmdp1ns.svc:4318/v1/logs"}
+
+    # activation server
+    TP_ACTIVATION_SERVER_IP: ${GUI_TP_ACTIVATION_SERVER_IP:-""}
+    TP_ACTIVATION_SERVER_PORT: ${GUI_TP_ACTIVATION_SERVER_PORT:-"7070"}
+    TP_ACTIVATION_SERVER_CERT_HOSTNAME: ${GUI_TP_ACTIVATION_SERVER_CERT_HOSTNAME:-""}
+    TP_ACTIVATION_SERVER_FINGER_PRINT: ${GUI_TP_ACTIVATION_SERVER_FINGER_PRINT:-""}
+
+    # image tag
+    TP_BMDP_IMAGE_TAG_BW5EMSDM: ${GUI_TP_BMDP_IMAGE_TAG_BW5EMSDM:-"emsdm-5.13.0-v12"}
+    TP_BMDP_IMAGE_TAG_BW5RVDM: ${GUI_TP_BMDP_IMAGE_TAG_BW5RVDM:-"rvdm-5.13.0-v13"}
+    TP_BMDP_IMAGE_TAG_BW6DM: ${GUI_TP_BMDP_IMAGE_TAG_BW6DM:-"bw-6.11.0"}
+    TP_BMDP_IMAGE_TAG_EMS: ${GUI_TP_BMDP_IMAGE_TAG_EMS:-"ems-10.4.0"}
+    TP_BMDP_IMAGE_TAG_HAWKCONSOLE: ${GUI_TP_BMDP_IMAGE_TAG_HAWKCONSOLE:-"hawkconsole-6.3.1"}
+
+    # flow control
+    TP_DEPLOY_RVDM: ${GUI_TP_DEPLOY_RVDM:-true}
+    TP_DEPLOY_EMS_SERVER: ${GUI_TP_DEPLOY_EMS_SERVER:-true}
+    TP_DEPLOY_EMSDM: ${GUI_TP_DEPLOY_EMSDM:-true}
+    TP_DEPLOY_HAWKCONSOLE: ${GUI_TP_DEPLOY_HAWKCONSOLE:-true}
+    TP_DEPLOY_BW6DM: ${GUI_TP_DEPLOY_BW6DM:-true}
+  tools:
+    yq: "4.40"
+helmCharts:
+  - name: bw5dm-chart
+    condition: true
+    version: ${BW5_CHART_VERSION}
+    namespace: ${TP_BWDM_NAMESPACE}
+    releaseName: ${TP_BWDM_RELEASE_NAME}
+    repo:
+      helm:
+        url: ${TP_CHART_REPO}
+        username: "${TP_CHART_REPO_USER_NAME}"
+        password: "${TP_CHART_REPO_TOKEN}"
+    values:
+      keepPrevious: true
+      content: |
+        githubToken: ${TP_CHART_REPO_TOKEN}
+        secret:
+          enabled: true
+        ems-server:
+          enabled: ${TP_DEPLOY_EMS_SERVER}
+          deployment:
+            image:
+              tag: "${TP_BMDP_IMAGE_TAG_EMS}"
+            env:
+              - name: TIBEMS_LICENSE
+                value: "https://${TP_ACTIVATION_SERVER_CERT_HOSTNAME}:${TP_ACTIVATION_SERVER_PORT}/?fp=${TP_ACTIVATION_SERVER_FINGER_PRINT}"
+        bw5emsdm:
+          enabled: ${TP_DEPLOY_EMSDM}
+          deployment:
+            image:
+              tag: "${TP_BMDP_IMAGE_TAG_BW5EMSDM}"
+            env:
+              - name: OTEL_TRACES_ENDPOINT
+                value: "${TP_OTEL_TRACES_ENDPOINT}"
+              - name: OTEL_METRICS_ENDPOINT
+                value: "${TP_OTEL_METRICS_ENDPOINT}"
+              - name: OTEL_LOGS_ENDPOINT
+                value: "${TP_OTEL_LOGS_ENDPOINT}"
+              - name: LICENSE_URL
+                value: "https://${TP_ACTIVATION_SERVER_CERT_HOSTNAME}:${TP_ACTIVATION_SERVER_PORT}/?fp=${TP_ACTIVATION_SERVER_FINGER_PRINT}"
+              - name: ACTIVATION_SERVER_IP
+                value: "${TP_ACTIVATION_SERVER_IP}"
+              - name: ACTIVATION_SERVER_HOSTNAME
+                value: "${TP_ACTIVATION_SERVER_CERT_HOSTNAME}"
+              # Use the ems-server above by default, if you want to use a different one, set info below
+              # - name: EMS_URL
+              #   value: "tcp://newemsserver:7222"
+              # - name: EMS_USER
+              #   value: "admin"
+              # - name: EMS_PASSWORD
+              #   value: "abc"
+        bw5rvdm:
+          enabled: ${TP_DEPLOY_RVDM}
+          deployment:
+            image:
+              tag: "${TP_BMDP_IMAGE_TAG_BW5RVDM}"
+            env:
+              - name: OTEL_TRACES_ENDPOINT
+                value: "${TP_OTEL_TRACES_ENDPOINT}"
+              - name: OTEL_METRICS_ENDPOINT
+                value: "${TP_OTEL_METRICS_ENDPOINT}"
+              - name: OTEL_LOGS_ENDPOINT
+                value: "${TP_OTEL_LOGS_ENDPOINT}"
+              - name: LICENSE_URL
+                value: "https://${TP_ACTIVATION_SERVER_CERT_HOSTNAME}:${TP_ACTIVATION_SERVER_PORT}/?fp=${TP_ACTIVATION_SERVER_FINGER_PRINT}"
+              - name: ACTIVATION_SERVER_IP
+                value: "${TP_ACTIVATION_SERVER_IP}"
+              - name: ACTIVATION_SERVER_HOSTNAME
+                value: "${TP_ACTIVATION_SERVER_CERT_HOSTNAME}"
+        hawkconsole:
+          enabled: ${TP_DEPLOY_HAWKCONSOLE}
+          deployment:
+            image:
+              tag: "${TP_BMDP_IMAGE_TAG_HAWKCONSOLE}"
+        bw6dm:
+          enabled: ${TP_DEPLOY_BW6DM}
+          deployment:
+            image:
+              tag: "${TP_BMDP_IMAGE_TAG_BW6DM}"
+    cluster:
+      names:
+        - ${TP_CLUSTER_NAME}
+    flags:
+      wait: true
+      timeout: 1h
+      createNamespace: true
+    hooks:
+      preDeploy:
+        ignoreErrors: false
+        base64Encoded: false
+        skip: false
+        content: |
+          kubectl create ns ${TP_BWDM_NAMESPACE}
+          # add label for bmdp to connect to this namespace
+          kubectl label namespace ${TP_BWDM_NAMESPACE} networking.platform.tibco.com/non-dp-ns=enable
+
+          # BW, EMS also need to add the activation server otherwise the pod will not ready
+          add_static_dns_record_to_coredns() {
+            local namespace="kube-system"
+            local configmap_name="coredns"
+            local new_record="${TP_ACTIVATION_SERVER_IP} ${TP_ACTIVATION_SERVER_CERT_HOSTNAME}"
+
+            echo "🔍 Reading current NodeHosts from ConfigMap '$configmap_name' in namespace '$namespace'..."
+            local current_hosts
+            current_hosts=$(kubectl get configmap "$configmap_name" -n "$namespace" -o jsonpath='{.data.NodeHosts}')
+
+            if echo "$current_hosts" | grep -Fxq "$new_record"; then
+              echo "✅ Record already exists: $new_record"
+              return 0
+            fi
+
+            echo "➕ Appending new record: $new_record"
+            local updated_hosts="${current_hosts}"$'\n'"${new_record}"
+
+            echo "📦 Patching ConfigMap..."
+            kubectl patch configmap "$configmap_name" -n "$namespace" --type merge \
+              --patch "$(cat <<EOF
+          data:
+            NodeHosts: |
+          $(echo "$updated_hosts" | sed 's/^/    /')
+          EOF
+          )"
+
+            echo "✅ Record added successfully."
+
+            echo "🔄 Restarting CoreDNS to apply changes..."
+            kubectl -n "$namespace" rollout restart deployment coredns
+
+            echo "🎉 Done."
+          }
+
+          add_static_dns_record_to_coredns

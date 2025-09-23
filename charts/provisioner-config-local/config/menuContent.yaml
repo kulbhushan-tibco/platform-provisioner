@@ -24,7 +24,7 @@ menuConfig:
     - label: "TP base on-prem"
       url: "/pipelines/helm-install?title=tp-base-on-prem"
       config: pp-deploy-tp-base-on-prem.yaml
-    - label: "TP base on-perm with certificate"
+    - label: "TP base on-prem with certificate"
       url: "/pipelines/helm-install?title=tp-base-on-prem-cert"
       config: pp-deploy-tp-base-on-prem-cert.yaml
   - separator: true
@@ -113,6 +113,9 @@ menuConfig:
     - label: "Deploy DP and config o11y"
       url: "/pipelines/generic-runner-tester?title=tp-automation-o11y"
       config: pp-maintain-tp-automation-o11y.yaml
+    - label: "Deploy BW5"
+      url: "/pipelines/helm-install?title=tp-deploy-bw5dm"
+      config: pp-maintain-tp-deploy-bw5dm.yaml
 - label: "Pipelines"
   url: "/pipelines"
   icon: 'pi pi-fw pi-list'
@@ -122,6 +125,6 @@ menuConfig:
 - label: "Docs"
   icon: 'pi pi-fw pi-book'
   items:
-  - label: "Connect K8S"
+  - label: "readme"
     url: "/docs/connectDetailsPage"
     icon: 'pi pi-fw pi-link'
